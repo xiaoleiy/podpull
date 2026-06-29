@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "podget"
+version = "0.1.0"
+description = "Download specific podcast episode audio from Apple Podcasts, RSS feeds, or xiaoyuzhou links — stdlib only."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "xiaoleiyu" }]
+keywords = ["podcast", "download", "apple-podcasts", "rss", "xiaoyuzhou", "mp3", "m4a", "cli"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Sound/Audio",
+]
+dependencies = []   # stdlib only
+
+[project.urls]
+Homepage = "https://github.com/xiaoliy/podget"
+Issues = "https://github.com/xiaoliy/podget/issues"
+
+[project.scripts]
+podget = "podget.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/podget"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"

@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Downloaded audio (never commit media)
+*.mp3
+*.m4a
+*.aac
+Podcasts/
+
+# OS
+.DS_Store
