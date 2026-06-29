@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>podpull — choose a landing page design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#101216;--card:#181b22;--line:#2a2f3a;--txt:#e8ebf2;--dim:#8b93a7;--ac:#35e0a1}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:"JetBrains Mono",monospace;line-height:1.6;padding:40px 22px 70px}
+.wrap{max-width:960px;margin:0 auto}
+h1{font-size:26px;letter-spacing:-.01em}h1 i{color:var(--ac);font-style:normal}
+.sub{color:var(--dim);font-size:14px;margin:8px 0 30px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.opt{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:.15s}
+.opt:hover{border-color:var(--ac);transform:translateY(-3px)}
+.swatch{height:96px;display:flex;align-items:center;justify-content:center;font-size:13px;letter-spacing:.1em;text-transform:uppercase}
+.s-ed{background:#efe7d4;color:#15120b}
+.s-tm{background:#050805;color:#3bf07a;text-shadow:0 0 8px rgba(59,240,122,.6)}
+.s-au{background:linear-gradient(110deg,#15c98a,#1f7bff 60%,#9b5cff);color:#04150e}
+.s-sw{background:#f5f5f1;color:#0d0d0d;background-image:linear-gradient(rgba(13,13,13,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(13,13,13,.08) 1px,transparent 1px);background-size:14px 14px}
+.s-sw b{color:#ff3b00}
+.body{padding:15px 17px}
+.body h2{font-size:16px}.body .tag{color:var(--ac);font-size:11px;text-transform:uppercase;letter-spacing:.12em}
+.body p{color:var(--dim);font-size:13px;margin-top:6px}
+.go{margin-top:10px;font-size:12px;color:var(--ac)}
+.note{color:var(--dim);font-size:13px;margin-top:30px;border-top:1px solid var(--line);padding-top:18px}
+@media(max-width:680px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><i>▸</i> podpull — pick a landing page</h1>
+  <div class="sub">Four directions, same content. Open each, then tell me which to make the live homepage.</div>
+  <div class="grid">
+    <a class="opt" href="../">
+      <div class="swatch s-ed">EDITORIAL</div>
+      <div class="body"><span class="tag">current · live</span><h2>Editorial / print-zine</h2><p>Ink-on-newsprint, oversized serif numerals, hard rules, riso-red. Warm, magazine-like.</p><div class="go">open ↗</div></div>
+    </a>
+    <a class="opt" href="terminal.html">
+      <div class="swatch s-tm">▸ TERMINAL_</div>
+      <div class="body"><span class="tag">new</span><h2>Terminal / phosphor</h2><p>Dark CRT, green phosphor + amber, scanlines, animated terminal demo. Maximally on-brand for a CLI.</p><div class="go">open ↗</div></div>
+    </a>
+    <a class="opt" href="aurora.html">
+      <div class="swatch s-au">AURORA</div>
+      <div class="body"><span class="tag">new</span><h2>Aurora / modern dark</h2><p>Deep dark with a living aurora gradient, glassy cards, big geometric display type. Sleek &amp; product-like.</p><div class="go">open ↗</div></div>
+    </a>
+    <a class="opt" href="swiss.html">
+      <div class="swatch s-sw">SWISS <b>▸</b></div>
+      <div class="body"><span class="tag">new</span><h2>Swiss / technical</h2><p>Light, grid-ruled, precise, monochrome + one hot accent. Spec-sheet clarity.</p><div class="go">open ↗</div></div>
+    </a>
+  </div>
+  <div class="note">Once you choose, I'll promote it to the homepage (<code>docs/index.html</code>) and remove the rest. Source: <a href="https://github.com/xiaoleiy/podpull" style="color:var(--ac)">github.com/xiaoleiy/podpull</a></div>
+</div>
+</body>
+</html>

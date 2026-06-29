@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>podpull — swiss edition</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23fafafa'/%3E%3Ctext x='5' y='24' font-family='monospace' font-size='21' fill='%23ff3b00'%3E%E2%96%B8%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{ --paper:#f5f5f1; --ink:#0d0d0d; --dim:#6b6b66; --red:#ff3b00; --blue:#1b3cff;
+  --line:#0d0d0d; --max:1120px; }
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--paper); color:var(--ink); font-family:"Hanken Grotesk",system-ui,sans-serif;
+  font-size:17px; line-height:1.5; overflow-x:hidden;
+  background-image:linear-gradient(rgba(13,13,13,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(13,13,13,.045) 1px,transparent 1px);
+  background-size:34px 34px}
+::selection{background:var(--red);color:#fff}
+a{color:inherit}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 26px}
+.mono{font-family:"JetBrains Mono",monospace}
+.lab{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+
+.top{border-bottom:2px solid var(--line)}
+.top .wrap{display:flex;justify-content:space-between;align-items:center;padding:12px 0}
+.top .brand{font-weight:900;letter-spacing:-.02em;font-size:19px}
+.top .brand i{color:var(--red);font-style:normal}
+.top a{text-decoration:none;font-family:"JetBrains Mono";font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+.top a:hover{color:var(--red)}
+
+.hero{border-bottom:2px solid var(--line);padding:18px 0 0}
+.hgrid{display:grid;grid-template-columns:1.4fr 1fr;gap:0}
+.hleft{padding:30px 36px 40px 0;border-right:2px solid var(--line)}
+.idx{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:22px}
+h1{font-weight:900;font-size:clamp(46px,8vw,104px);line-height:.92;letter-spacing:-.04em;margin-bottom:18px}
+h1 .r{color:var(--red)}
+.lead{font-size:20px;max-width:34ch;color:var(--ink)}
+.lead b{color:var(--red)}
+.hright{padding:30px 0 30px 34px;display:flex;flex-direction:column;justify-content:space-between;gap:18px}
+.spec div{display:flex;justify-content:space-between;border-bottom:1px dotted var(--dim);padding:7px 0;font-size:14px}
+.spec span:first-child{color:var(--dim)} .spec span:last-child{font-weight:600;font-family:"JetBrains Mono";font-size:13px}
+
+.term{border:2px solid var(--line);background:#0d0d0d;color:#eee;font-family:"JetBrains Mono";font-size:12.5px;line-height:1.7;padding:14px;white-space:pre-wrap;word-break:break-word}
+.term .p{color:#ff7a4d}.term .g{color:#5ad17a}.term .d{color:#8a8a86}.term .s{color:#ffd24a}
+
+section{border-bottom:2px solid var(--line);padding:44px 0}
+h2{font-weight:900;font-size:clamp(28px,4.4vw,52px);letter-spacing:-.03em;line-height:1;margin:6px 0 26px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr)}
+.step{padding:0 28px;border-right:1px solid var(--line)}
+.step:first-child{padding-left:0}.step:last-child{border-right:0;padding-right:0}
+.step .num{font-weight:900;font-size:62px;line-height:1;color:var(--red);letter-spacing:-.04em}
+.step h3{font-size:21px;font-weight:800;margin:4px 0 8px}
+.step p{color:var(--dim);font-size:15px;margin-bottom:12px}
+.step code{display:block;font-family:"JetBrains Mono";font-size:12.5px;background:var(--ink);color:var(--paper);padding:9px 11px} .step code b{color:var(--s,#ffd24a)}
+.pipe{font-family:"JetBrains Mono";font-size:clamp(11px,1.6vw,14.5px);line-height:2.1;border:2px solid var(--line);background:#fff;padding:20px;overflow-x:auto}
+.pipe .a{color:var(--red);font-weight:700}.pipe .b{color:var(--blue);font-weight:700}.pipe .d{color:var(--dim)}
+.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:0 40px}
+.frow{display:flex;gap:14px;align-items:baseline;border-top:1px solid var(--line);padding:14px 0}
+.frow .k{font-family:"JetBrains Mono";font-weight:700;color:var(--red);font-size:14px}
+.frow h4{font-size:17px;font-weight:800} .frow p{color:var(--dim);font-size:14px}
+.soon{font-family:"JetBrains Mono";font-size:10px;border:1px solid var(--blue);color:var(--blue);padding:1px 5px;margin-left:6px;text-transform:uppercase}
+.install{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.icol{padding:0 26px;border-right:1px solid var(--line)}.icol:first-child{padding-left:0}.icol:last-child{border-right:0;padding-right:0}
+.cmd{display:flex;justify-content:space-between;align-items:center;gap:10px;border:2px solid var(--line);background:#fff;padding:13px 14px;margin-top:10px}
+.cmd code{font-family:"JetBrains Mono";font-size:13px;word-break:break-all} .cmd code .p{color:var(--red)}
+.copy{font-family:"JetBrains Mono";font-size:11px;background:var(--ink);color:var(--paper);border:0;padding:7px 11px;cursor:pointer;text-transform:uppercase;letter-spacing:.08em}
+.copy:hover{background:var(--red)}
+footer{padding:26px 0 56px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:"JetBrains Mono";font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+footer a{text-decoration:none;border-bottom:2px solid var(--red)}
+.big{font-weight:900;font-size:clamp(38px,9vw,118px);letter-spacing:-.04em;line-height:.85;text-transform:none;margin-top:22px;border-top:2px solid var(--line);padding-top:18px}
+.big i{color:var(--red);font-style:normal}
+.pick{position:fixed;top:10px;right:12px;z-index:50;font-family:"JetBrains Mono";font-size:11px;background:#fff;border:2px solid var(--line);padding:5px 9px}
+.pick a{color:var(--red)}
+@media(max-width:820px){.hgrid{grid-template-columns:1fr}.hleft{border-right:0;border-bottom:2px solid var(--line);padding:24px 0}.hright{padding:24px 0}.steps,.install,.fgrid{grid-template-columns:1fr}.step,.icol{border-right:0;padding:0;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px}}
+</style>
+</head>
+<body>
+<div class="pick">SWISS · <a href="./">↩ all</a></div>
+
+<div class="top"><div class="wrap"><div class="brand"><i>▸</i> podpull</div><a href="https://github.com/xiaoleiy/podpull">github ↗</a></div></div>
+
+<header class="hero"><div class="wrap"><div class="hgrid">
+  <div class="hleft">
+    <div class="idx lab"><span>Fig. 00 — Command-line podcast retrieval</span><span>v0.3.0</span></div>
+    <h1>Download<br>any episode.<br><span class="r">To disk.</span></h1>
+    <p class="lead">A precise command-line tool: resolve a show, <b>pick episodes from a list</b>, pull the audio. Apple Podcasts, RSS, or 小宇宙.</p>
+  </div>
+  <div class="hright">
+    <div class="term"><span class="p">$</span> podpull get 1532755821
+<span class="g">✓</span> <span class="d">我們家的睡前故事 — 394 eps</span>
+<span class="g">?</span> Select episodes <span class="d">(↑/↓·space)</span>
+<span class="s">❯ ◉</span> 2026-06-23 迷宮中的牛頭人
+  <span class="d">◯</span> 2026-06-16 午睡任務
+<span class="s">  ◉</span> 2026-06-09 修煉龍 4
+<span class="g">✓</span> <span class="d">2 episodes → ~/Downloads/Podcasts</span></div>
+    <div class="spec lab">
+      <div><span>Sources</span><span>Apple · RSS · 小宇宙</span></div>
+      <div><span>Formats</span><span>mp3 · m4a</span></div>
+      <div><span>License</span><span>MIT · free</span></div>
+    </div>
+  </div>
+</div></div></header>
+
+<section><div class="wrap">
+  <div class="lab">Section 01</div><h2>How it works</h2>
+  <div class="pipe">
+<span class="d">Apple show / id</span>  ──<span class="a">( iTunes Lookup )</span>──▶  RSS feed url
+<span class="d">RSS feed</span>         ──<span class="a">( &lt;enclosure&gt; )</span>───▶  direct .mp3 / .m4a
+<span class="d">小宇宙 link</span>       ──<span class="b">( og:audio )</span>──────▶  direct .m4a
+<span class="d">download</span>         ──<span class="a">( resumable )</span>─────▶  YYYY-MM-DD - title.ext
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="lab">Section 02</div><h2>Three moves</h2>
+  <div class="steps">
+    <div class="step"><div class="num">01</div><h3>Search</h3><p>Find any show by name.</p><code><span class="p">$</span> podpull search <b>"睡前故事"</b></code></div>
+    <div class="step"><div class="num">02</div><h3>Pick</h3><p>Interactive multi-select list.</p><code><span class="p">$</span> podpull get <b>1532755821</b></code></div>
+    <div class="step"><div class="num">03</div><h3>Download</h3><p>Resumable, with progress.</p><code><span class="p">$</span> podpull get <b>--latest 3</b></code></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="lab">Section 03</div><h2>Specification</h2>
+  <div class="fgrid">
+    <div class="frow"><span class="k">A</span><div><h4>Interactive picker</h4><p>Arrow-key, multi-select checklist.</p></div></div>
+    <div class="frow"><span class="k">B</span><div><h4>Live progress</h4><p>Size · speed · ETA bars.</p></div></div>
+    <div class="frow"><span class="k">C</span><div><h4>Apple · RSS · 小宇宙</h4><p>Shows, feeds, or a pasted link.</p></div></div>
+    <div class="frow"><span class="k">D</span><div><h4>Resumable</h4><p>Range requests resume drops.</p></div></div>
+    <div class="frow"><span class="k">E</span><div><h4>Scriptable</h4><p>Path on stdout, UI on stderr.</p></div></div>
+    <div class="frow"><span class="k">F</span><div><h4>BYOK summaries<span class="soon">soon</span></h4><p>Local transcription + your LLM key.</p></div></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="lab">Section 04</div><h2>Install</h2>
+  <div class="install">
+    <div class="icol"><div class="lab">Homebrew — recommended</div><div class="cmd"><code><span class="p">$</span> brew install xiaoleiy/tap/podpull</code><button class="copy" data-c="brew install xiaoleiy/tap/podpull">Copy</button></div></div>
+    <div class="icol"><div class="lab">pipx — from source</div><div class="cmd"><code><span class="p">$</span> pipx install git+https://github.com/xiaoleiy/podpull</code><button class="copy" data-c="pipx install git+https://github.com/xiaoleiy/podpull">Copy</button></div></div>
+  </div>
+</div></section>
+
+<div class="wrap"><footer><span>MIT © 2026 xiaoleiy</span><span><a href="https://github.com/xiaoleiy/podpull">Source ↗</a></span></footer>
+<div class="big">Stop streaming.<br>Start <i>keeping.</i></div>
+<div style="height:50px"></div></div>
+
+<script>
+document.querySelectorAll(".copy").forEach(function(b){b.addEventListener("click",function(){navigator.clipboard.writeText(b.dataset.c).then(function(){var t=b.textContent;b.textContent="Copied";setTimeout(function(){b.textContent=t},1200)})})});
+</script>
+</body>
+</html>
