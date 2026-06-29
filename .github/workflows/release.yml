@@ -1,0 +1,89 @@
+name: Release
+
+# When a version tag (v*) is pushed, recompute the source-tarball checksum and
+# update Formula/podpull.rb in xiaoleiy/homebrew-tap so `brew install` tracks the
+# new release automatically. Manual re-sync available via workflow_dispatch.
+#
+# NOTE: this bumps only the top-level url + sha256 (the package itself). If the
+# Python dependencies change, regenerate the vendored `resource` blocks with
+#   brew update-python-resources xiaoleiy/tap/podpull
+# and commit that to the tap manually — the workflow does not touch resources.
+#
+# Requires repo secret TAP_GITHUB_TOKEN: a token with contents:write on
+# xiaoleiy/homebrew-tap (the same PAT used by the agent-hub release workflow).
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)sync the tap from, e.g. v0.3.0"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  update-tap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve tag
+        id: ver
+        env:
+          # workflow_dispatch input is user-controlled -> route via env, never
+          # inline into a run: script (prevents shell injection).
+          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Compute source-tarball SHA256
+        id: sha
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          URL="https://github.com/${REPO}/archive/refs/tags/${TAG}.tar.gz"
+          curl -fsSL "$URL" -o src.tar.gz
+          echo "url=${URL}" >> "$GITHUB_OUTPUT"
+          echo "sha=$(sha256sum src.tar.gz | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout homebrew-tap
+        uses: actions/checkout@v4
+        with:
+          repository: xiaoleiy/homebrew-tap
+          token: ${{ secrets.TAP_GITHUB_TOKEN }}
+          path: tap
+
+      - name: Bump Formula/podpull.rb (url + sha256)
+        env:
+          URL: ${{ steps.sha.outputs.url }}
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          set -euo pipefail
+          F=tap/Formula/podpull.rb
+          # Only the top-level (2-space-indented) url/sha256 — resource blocks are
+          # indented 4 spaces and must not be touched here.
+          sed -i -E "s|^  url \".*\"|  url \"${URL}\"|" "$F"
+          sed -i -E "s|^  sha256 \"[0-9a-fA-F]*\"|  sha256 \"${SHA}\"|" "$F"
+          echo "----- updated formula head -----"
+          head -8 "$F"
+          grep -q "$SHA" "$F" || { echo "::error::sha256 not written"; exit 1; }
+
+      - name: Commit and push
+        working-directory: tap
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "Tap already up to date for ${TAG}."; exit 0
+          fi
+          git add Formula/podpull.rb
+          git commit -m "podpull ${TAG#v}"
+          git push
