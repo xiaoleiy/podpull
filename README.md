@@ -1,5 +1,6 @@
 # podpull
 
+[![PyPI](https://img.shields.io/pypi/v/podpull.svg)](https://pypi.org/project/podpull/)
 [![CI](https://github.com/xiaoleiy/podpull/actions/workflows/ci.yml/badge.svg)](https://github.com/xiaoleiy/podpull/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-informational.svg)](LICENSE)
 ![Platforms](https://img.shields.io/badge/platforms-macOS%20·%20Linux%20·%20Windows-lightgrey.svg)
@@ -43,18 +44,16 @@ pasted **Apple episode** link (`…?i=<id>`, matched in the feed).
 ## Install
 
 ```bash
-# Homebrew (recommended)
-brew install xiaoleiy/tap/podpull
+# pipx (recommended) or pip — from PyPI
+pipx install podpull
+pip   install podpull
 
-# or pipx / pip, straight from git
-pipx install git+https://github.com/xiaoleiy/podpull
-pip   install git+https://github.com/xiaoleiy/podpull
+# or Homebrew (macOS / Linux)
+brew install xiaoleiy/tap/podpull
 ```
 
 Requires Python 3.9+. Optional: `yt-dlp` (deep-catalog Apple-episode fallback),
-`ffmpeg`/`ffprobe` (verify downloads).
-
-> **Note:** not yet published to PyPI — install via the Homebrew tap or from git.
+`ffmpeg`/`ffprobe` (verify downloads). Also on [PyPI](https://pypi.org/project/podpull/).
 
 ### Set up your AI coding agents (optional)
 
