@@ -28,6 +28,12 @@ def test_safe_filename():
     assert core.safe_filename("：？ hello ｜") == "hello"
     assert core.safe_filename("...   ") == "untitled"
     assert core.safe_filename("") == "untitled"
+    # Windows reserved device names are made safe (case-insensitive, incl. with extension)
+    assert core.safe_filename("CON") == "_CON"
+    assert core.safe_filename("nul") == "_nul"
+    assert core.safe_filename("COM1") == "_COM1"
+    assert core.safe_filename("CON.mp3").startswith("_")
+    assert not core.safe_filename("Console war").startswith("_")  # not actually reserved
 
 
 def test_ext_for():

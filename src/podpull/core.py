@@ -204,6 +204,10 @@ _FORBIDDEN = re.compile(r'[\\/:*?"<>|\x00-\x1f]')
 # Unicode categories to drop: emoji & other symbols, modifier symbols,
 # format/control/surrogate/private-use/unassigned.
 _DROP_CATEGORIES = frozenset({"So", "Sk", "Cf", "Cc", "Cs", "Co", "Cn"})
+# Windows reserved device names — illegal as a filename base even with an extension.
+_RESERVED = frozenset({"CON", "PRN", "AUX", "NUL",
+                       *(f"COM{i}" for i in range(1, 10)),
+                       *(f"LPT{i}" for i in range(1, 10))})
 
 
 def safe_filename(name: str, maxlen: int = 120) -> str:
@@ -220,7 +224,11 @@ def safe_filename(name: str, maxlen: int = 120) -> str:
                    for c in name)
     name = _FORBIDDEN.sub(" ", name)
     name = re.sub(r"\s+", " ", name).strip(" .-_")
-    return name[:maxlen].strip(" .-_") or "untitled"
+    name = name[:maxlen].strip(" .-_") or "untitled"
+    # Avoid Windows reserved device names (CON, NUL, COM1…), incl. "CON.mp3".
+    if name.split(".", 1)[0].strip().upper() in _RESERVED:
+        name = "_" + name
+    return name
 
 
 def ext_for(url: str, mime: str) -> str:

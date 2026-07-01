@@ -3,6 +3,14 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
+## [0.5.1] — 2026-06-30
+
+### Fixed
+- **Windows compatibility**: normalized filenames now avoid Windows reserved device names
+  (`CON`, `NUL`, `COM1`…, even with an extension); stdout/stderr are reconfigured to UTF-8 so CJK
+  titles/paths never raise `UnicodeEncodeError` on a legacy console or when piped.
+- **CI** now runs on Windows and macOS in addition to Linux (Python 3.9/3.11/3.13).
+
 ## [0.5.0] — 2026-06-30
 
 ### Added

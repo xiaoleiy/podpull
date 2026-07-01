@@ -382,6 +382,13 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Ensure Unicode (CJK titles/paths) never crash on a legacy Windows console
+    # or when stdout is redirected to a non-UTF-8 pipe.
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+        except (AttributeError, ValueError):
+            pass
     parser = build_parser()
     args = parser.parse_args(argv)
     if not getattr(args, "func", None):     # bare `podpull` -> show usage, not an error
