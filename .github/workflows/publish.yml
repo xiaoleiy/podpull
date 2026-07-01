@@ -1,0 +1,28 @@
+name: Publish to PyPI
+
+# Publishes podpull to PyPI. Fires on a version tag (v*) — alongside the tap
+# auto-bump — and can be run manually via the Actions tab. Requires the repo
+# secret PYPI_API_TOKEN (a PyPI API token). `skip-existing` makes re-runs safe.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pypi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build
+      - run: python -m build
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true
