@@ -123,3 +123,18 @@ def test_get_single_episode_no_folder(monkeypatch, tmp_path):
                                         index=None, out=str(tmp_path), no_input=True))
     assert rc == 0
     assert outs == [str(tmp_path)]               # single -> straight into out dir
+
+def test_get_quiet_skips_picker_and_progress(monkeypatch, tmp_path):
+    show = _show()
+    monkeypatch.setattr(cli.core, "classify", lambda s: ("apple_show", s))
+    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s, args=None: show)
+    monkeypatch.setattr(cli, "_interactive",
+                        lambda: (_ for _ in ()).throw(AssertionError("picker used")))
+    got = _record_downloads(monkeypatch)
+
+    rc = cli.cmd_get(argparse.Namespace( src="123", match="EP1", latest=None, index=None, 
+                                        out=str(tmp_path), no_input=False, quiet=True))
+
+    assert rc == 0
+    assert got == ["EP1"]
+
