@@ -25,6 +25,8 @@ podpull info  <src>                          # show metadata (title, author, fee
 podpull list  <src> [--match RE] [--all]     # list episodes; index 0 = newest
 podpull get   <src> --match RE | --latest N | --index 0,2[,..]   # download (alias: `pull`)
 podpull get   <episode-url>                  # download a pasted Apple ?i= or xiaoyuzhou link
+podpull get   <src> ... -q / --quiet         # suppress spinner/progress bar
+
 ```
 
 `<src>` = Apple show URL · bare Apple ID · RSS feed URL · Apple episode `?i=` URL · xiaoyuzhou episode URL.
@@ -40,6 +42,9 @@ podpull get   <episode-url>                  # download a pasted Apple ?i= or xi
 - **Always pass a selector and `--no-input`.** Running `podpull get <show>` with *no* selector opens an
   interactive keyboard picker — which can't be driven non-interactively and will instead error with a hint.
   Use e.g. `podpull get 1532755821 --latest 1 --no-input`.
+- **Add `-q`/`--quiet`** to suppress the spinner and live progress bar on stderr — recommended for
+  agent transcripts, since neither renders meaningfully outside a live terminal. Saved file paths still
+  print to stdout either way.
 - Downloads default to `~/Downloads/Podcasts`; pass `--out DIR` to change.
 - Selecting **multiple** episodes creates a per-show sub-folder. Filenames are normalized to be
   cloud-storage-safe (emoji/illegal characters removed; CJK kept).
@@ -48,7 +53,7 @@ podpull get   <episode-url>                  # download a pasted Apple ?i= or xi
 
 ```
 podpull search "睡前故事"
-podpull get 1532755821 --latest 1 --no-input
+podpull get 1532755821 --latest 1 --no-input --quiet
 podpull get 1532755821 --match "牛頭人" --no-input --out ~/Audio
 podpull get "https://www.xiaoyuzhoufm.com/episode/<id>" --no-input
 ```

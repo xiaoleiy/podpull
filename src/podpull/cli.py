@@ -43,7 +43,8 @@ def _interactive() -> bool:
 # --------------------------------------------------------------------------- #
 def _resolve_show(kind: str, s: str, args) -> core.Show:
     """Resolve a show/feed with step-by-step spinner feedback."""
-    if args.quiet:
+    quiet = getattr(args, "quiet", False)
+    if quiet:
         # quiet mode: no spinner
         if kind == "apple_show":
             feed, name, author, pid = core.apple_show_to_feed(s)
@@ -232,7 +233,7 @@ def cmd_get(args) -> int:
                 _err("nothing selected")
                 return 1
         else:
-            cmd_list(argparse.Namespace(src=s, match=None, all=False, limit=20))
+            cmd_list(argparse.Namespace(src=s, match=None, all=False, limit=20, quiet=args.quiet))
             _err("no selector and not an interactive terminal — pass "
                  "--match RE / --latest N / --index 0,2")
             return 1

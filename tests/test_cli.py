@@ -38,51 +38,51 @@ def _record_downloads(monkeypatch):
 def test_get_interactive_selection_downloads_picked(monkeypatch, tmp_path):
     show = _show()
     monkeypatch.setattr(cli.core, "classify", lambda s: ("apple_show", s))
-    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s: show)
+    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s, args=None: show)
     monkeypatch.setattr(cli, "_interactive", lambda: True)
     monkeypatch.setitem(sys.modules, "questionary", _fake_questionary([0, 2]))
     got = _record_downloads(monkeypatch)
 
     rc = cli.cmd_get(argparse.Namespace(src="123", match=None, latest=None,
-                                        index=None, out=str(tmp_path), no_input=False))
+                                        index=None, out=str(tmp_path), no_input=False, quiet=False))
     assert rc == 0
     assert got == ["EP0", "EP2"]
 
 
 def test_get_interactive_cancel_returns_error(monkeypatch, tmp_path):
     monkeypatch.setattr(cli.core, "classify", lambda s: ("apple_show", s))
-    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s: _show())
+    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s, args=None: _show())
     monkeypatch.setattr(cli, "_interactive", lambda: True)
     monkeypatch.setitem(sys.modules, "questionary", _fake_questionary(None))  # Ctrl-C
     got = _record_downloads(monkeypatch)
 
     rc = cli.cmd_get(argparse.Namespace(src="123", match=None, latest=None,
-                                        index=None, out=str(tmp_path), no_input=False))
+                                        index=None, out=str(tmp_path), no_input=False, quiet=False))
     assert rc == 1
     assert got == []
 
 
 def test_get_match_selector_skips_picker(monkeypatch, tmp_path):
     monkeypatch.setattr(cli.core, "classify", lambda s: ("apple_show", s))
-    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s: _show())
+    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s, args=None: _show())
     # _interactive() must NOT be consulted when a selector is given
     monkeypatch.setattr(cli, "_interactive", lambda: (_ for _ in ()).throw(AssertionError("picker used")))
     got = _record_downloads(monkeypatch)
 
     rc = cli.cmd_get(argparse.Namespace(src="123", match="EP1", latest=None,
-                                        index=None, out=str(tmp_path), no_input=False))
+                                        index=None, out=str(tmp_path), no_input=False, quiet=False))
     assert rc == 0
     assert got == ["EP1"]
 
 
 def test_get_no_input_flag_blocks_picker(monkeypatch, tmp_path):
     monkeypatch.setattr(cli.core, "classify", lambda s: ("apple_show", s))
-    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s: _show())
+    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s, args=None: _show())
     monkeypatch.setattr(cli, "_interactive", lambda: True)
     got = _record_downloads(monkeypatch)
 
     rc = cli.cmd_get(argparse.Namespace(src="123", match=None, latest=None,
-                                        index=None, out=str(tmp_path), no_input=True))
+                                        index=None, out=str(tmp_path), no_input=True, quiet=False))
     assert rc == 1            # falls back to list+hint, downloads nothing
     assert got == []
 
@@ -104,11 +104,11 @@ def _capture_outdirs(monkeypatch):
 
 def test_get_multiple_episodes_go_in_show_folder(monkeypatch, tmp_path):
     monkeypatch.setattr(cli.core, "classify", lambda s: ("apple_show", s))
-    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s: _show())  # title "Demo Show"
+    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s, args=None: _show())  # title "Demo Show"
     outs = _capture_outdirs(monkeypatch)
 
     rc = cli.cmd_get(argparse.Namespace(src="123", match=None, latest=2,
-                                        index=None, out=str(tmp_path), no_input=True))
+                                        index=None, out=str(tmp_path), no_input=True, quiet=False))
     assert rc == 0
     expected = os.path.join(str(tmp_path), "Demo Show")
     assert outs == [expected, expected]          # both into the show subfolder
@@ -116,11 +116,11 @@ def test_get_multiple_episodes_go_in_show_folder(monkeypatch, tmp_path):
 
 def test_get_single_episode_no_folder(monkeypatch, tmp_path):
     monkeypatch.setattr(cli.core, "classify", lambda s: ("apple_show", s))
-    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s: _show())
+    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s, args=None: _show())
     outs = _capture_outdirs(monkeypatch)
 
     rc = cli.cmd_get(argparse.Namespace(src="123", match=None, latest=1,
-                                        index=None, out=str(tmp_path), no_input=True))
+                                        index=None, out=str(tmp_path), no_input=True, quiet=False))
     assert rc == 0
     assert outs == [str(tmp_path)]               # single -> straight into out dir
 
