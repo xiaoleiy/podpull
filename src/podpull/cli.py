@@ -69,7 +69,11 @@ def _download_all(episodes: list[core.Episode], out_dir: str, args) -> int:
     if args.quiet:
         # quiet mode: no progress bar
         for ep in episodes:
-            path = core.download_episode(ep, out_dir)
+            try:
+                path = core.download_episode(ep, out_dir)
+            except Exception as e:
+                _err(f"{ep.title[:50]}: {e}")
+                continue
             print(path)
             n += 1
         return n
@@ -202,14 +206,20 @@ def cmd_get(args) -> int:
 
     # --- pasted episode links: download immediately ----------------------- #
     if kind == "xyz_episode":
-        with ui.status("[cyan]Resolving xiaoyuzhou episode…"):
+        if args.quiet:
             url, title = core.xyz_episode_to_audio(s)
+        else:
+            with ui.status("[cyan]Resolving xiaoyuzhou episode…"):
+                url, title = core.xyz_episode_to_audio(s)
         return 0 if _download_all([core.Episode(title=title, pub="", url=url,
                                                 mime="audio/mp4")], out, args) else 1
 
     if kind == "apple_episode":
-        with ui.status("[cyan]Resolving Apple episode…"):
+        if args.quiet:
             url, title, rel = core.apple_episode_to_audio(s)
+        else:
+            with ui.status("[cyan]Resolving Apple episode…"):
+                url, title, rel = core.apple_episode_to_audio(s)
         if not url:
             _err("episode beyond recent catalog; trying yt-dlp")
             return _ytdlp_fallback(s, out)
@@ -246,7 +256,8 @@ def cmd_get(args) -> int:
     target = out
     if len(sel) > 1:
         target = os.path.join(out, core.safe_filename(show.title))
-    ui.print(f"[bold]Downloading {len(sel)} episode(s)[/] from “{show.title}” → [dim]{target}[/]")
+    if not args.quiet:
+        ui.print(f"[bold]Downloading {len(sel)} episode(s)[/] from “{show.title}” → [dim]{target}[/]")
     return 0 if _download_all(sel, target, args) else 1
 
 
