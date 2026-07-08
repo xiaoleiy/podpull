@@ -4,10 +4,12 @@ No third-party dependencies — only the Python standard library.
 """
 from __future__ import annotations
 
+import hashlib
 import html.entities
 import json
 import os
 import re
+import time
 import unicodedata
 import urllib.error
 import urllib.parse
@@ -119,6 +121,59 @@ def apple_show_to_feed(src: str) -> tuple[str, str, str, str]:
     if not feed:
         raise ValueError(f"No feedUrl for id={pid} (not a podcast?)")
     return feed, r.get("collectionName", ""), r.get("artistName", ""), pid
+
+
+# --------------------------------------------------------------------------- #
+# Podcast Index (optional, BYOK) — free keys at https://api.podcastindex.org
+# Active only when both env vars are set; otherwise podpull never contacts PI.
+# --------------------------------------------------------------------------- #
+PODCASTINDEX_API = "https://api.podcastindex.org/api/1.0"
+
+
+def pi_credentials() -> "tuple[str, str] | None":
+    key = os.environ.get("PODCASTINDEX_API_KEY", "").strip()
+    secret = os.environ.get("PODCASTINDEX_API_SECRET", "").strip()
+    return (key, secret) if key and secret else None
+
+
+def _pi_headers(key: str, secret: str, now: "int | None" = None) -> dict:
+    ts = str(int(time.time()) if now is None else now)
+    auth = hashlib.sha1((key + secret + ts).encode()).hexdigest()
+    return {"User-Agent": UA, "X-Auth-Key": key, "X-Auth-Date": ts,
+            "Authorization": auth}
+
+
+def _pi_get(path: str, params: dict) -> dict:
+    creds = pi_credentials()
+    if not creds:
+        raise ValueError("Podcast Index credentials not set "
+                         "(PODCASTINDEX_API_KEY / PODCASTINDEX_API_SECRET)")
+    q = urllib.parse.urlencode(params)
+    req = urllib.request.Request(f"{PODCASTINDEX_API}{path}?{q}",
+                                 headers=_pi_headers(*creds))
+    return json.load(urllib.request.urlopen(req, timeout=45))
+
+
+def pi_search_shows(term: str, limit: int = 10) -> list:
+    """Search Podcast Index; rows use the same keys as iTunes search results
+    so the CLI table code needs no changes."""
+    data = _pi_get("/search/byterm", {"q": term, "max": limit})
+    return [{"collectionId": f.get("itunesId") or "",
+             "collectionName": f.get("title") or "",
+             "artistName": f.get("author") or "",
+             "feedUrl": f.get("url") or "",
+             "trackCount": f.get("episodeCount") or 0}
+            for f in data.get("feeds", [])]
+
+
+def pi_feed_by_itunes_id(pid: str) -> "str | None":
+    """Second-directory feed lookup by Apple ID. Never raises — returns None
+    so callers degrade gracefully when PI is down or has no entry."""
+    try:
+        feed = _pi_get("/podcasts/byitunesid", {"id": pid}).get("feed") or {}
+        return (feed.get("url") or None) if isinstance(feed, dict) else None
+    except Exception:
+        return None
 
 
 def _localname(tag) -> str:

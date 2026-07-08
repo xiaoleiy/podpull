@@ -241,3 +241,48 @@ def test_fetch_and_download_send_browser_ua(monkeypatch, tmp_path):
     core.download_url("https://cdn.lizhi.fm/a.mp3", str(tmp_path / "a.mp3"))
     assert seen == [core.UA, core.UA]
     assert all("mozilla" in ua.lower() and "python" not in ua.lower() for ua in seen)
+
+
+def test_pi_credentials(monkeypatch):
+    monkeypatch.delenv("PODCASTINDEX_API_KEY", raising=False)
+    monkeypatch.delenv("PODCASTINDEX_API_SECRET", raising=False)
+    assert core.pi_credentials() is None
+    monkeypatch.setenv("PODCASTINDEX_API_KEY", "k")
+    assert core.pi_credentials() is None          # secret still missing
+    monkeypatch.setenv("PODCASTINDEX_API_SECRET", "s")
+    assert core.pi_credentials() == ("k", "s")
+
+
+def test_pi_headers_deterministic():
+    h = core._pi_headers("key", "secret", now=1751900000)
+    assert h["X-Auth-Key"] == "key"
+    assert h["X-Auth-Date"] == "1751900000"
+    import hashlib
+    assert h["Authorization"] == hashlib.sha1(b"keysecret1751900000").hexdigest()
+    assert h["User-Agent"] == core.UA
+
+
+def test_pi_search_shows_normalizes(monkeypatch):
+    monkeypatch.setenv("PODCASTINDEX_API_KEY", "k")
+    monkeypatch.setenv("PODCASTINDEX_API_SECRET", "s")
+    monkeypatch.setattr(core, "_pi_get", lambda path, params: {
+        "feeds": [{"id": 887080, "title": "忽左忽右", "url": "https://feed.xyzfm.space/cv4bkgpuglwp",
+                   "author": "JustPod", "itunesId": 1478791559, "episodeCount": 380}],
+    })
+    rows = core.pi_search_shows("忽左忽右", limit=5)
+    assert rows == [{"collectionId": 1478791559, "collectionName": "忽左忽右",
+                     "artistName": "JustPod", "feedUrl": "https://feed.xyzfm.space/cv4bkgpuglwp",
+                     "trackCount": 380}]
+
+
+def test_pi_feed_by_itunes_id(monkeypatch):
+    monkeypatch.setattr(core, "_pi_get",
+                        lambda path, params: {"feed": {"url": "https://feed.example.test/x"}})
+    assert core.pi_feed_by_itunes_id("123") == "https://feed.example.test/x"
+    monkeypatch.setattr(core, "_pi_get", lambda path, params: {"feed": []})
+    assert core.pi_feed_by_itunes_id("123") is None
+
+    def _boom(path, params):
+        raise OSError("network down")
+    monkeypatch.setattr(core, "_pi_get", _boom)
+    assert core.pi_feed_by_itunes_id("123") is None   # degrades, never raises
