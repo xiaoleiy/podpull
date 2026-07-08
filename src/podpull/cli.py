@@ -41,49 +41,71 @@ def _interactive() -> bool:
 # --------------------------------------------------------------------------- #
 # shared helpers
 # --------------------------------------------------------------------------- #
-def _resolve_show(kind: str, s: str) -> core.Show:
+def _resolve_show(kind: str, s: str, args) -> core.Show:
     """Resolve a show/feed with step-by-step spinner feedback."""
-    with ui.status("[cyan]Resolving show via iTunes…", spinner="dots") as status:
+    quiet = getattr(args, "quiet", False)
+    if quiet:
+        # quiet mode: no spinner
         if kind == "apple_show":
             feed, name, author, pid = core.apple_show_to_feed(s)
-        else:                          # rss
+        else:
             feed, name, author, pid = s, "", "", ""
-        status.update("[cyan]Fetching RSS feed & parsing episodes…")
         title, feed_author, eps = core.parse_feed(feed)
+    else:
+        with ui.status("[cyan]Resolving show via iTunes…", spinner="dots") as status:
+            if kind == "apple_show":
+                feed, name, author, pid = core.apple_show_to_feed(s)
+            else:                          # rss
+                feed, name, author, pid = s, "", "", ""
+            status.update("[cyan]Fetching RSS feed & parsing episodes…")
+            title, feed_author, eps = core.parse_feed(feed)
     return core.Show(title=name or title, feed=feed,
                      author=author or feed_author, apple_id=pid, episodes=eps)
 
 
-def _download_all(episodes: list[core.Episode], out_dir: str) -> int:
+def _download_all(episodes: list[core.Episode], out_dir: str, args) -> int:
     """Download episodes with a live per-file progress bar."""
     n = 0
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[bold blue]{task.fields[label]}", justify="left"),
-        BarColumn(),
-        "[progress.percentage]{task.percentage:>3.0f}%",
-        DownloadColumn(),
-        TransferSpeedColumn(),
-        TimeRemainingColumn(),
-        console=ui,
-        transient=True,
-    ) as progress:
+    if args.quiet:
+        # quiet mode: no progress bar
         for ep in episodes:
-            task = progress.add_task("dl", label=ep.title[:34] or "episode", total=None)
-
-            def cb(done: int, total: int, _t=task) -> None:
-                progress.update(_t, completed=done, total=(total or None))
-
             try:
-                path = core.download_episode(ep, out_dir, on_progress=cb)
-            except Exception as e:      # keep going on a single failure
-                progress.console.print(f"[red]✗[/] {ep.title[:50]}: {e}")
+                path = core.download_episode(ep, out_dir)
+            except Exception as e:
+                _err(f"{ep.title[:50]}: {e}")
                 continue
-            progress.remove_task(task)
-            size = os.path.getsize(path)
-            ui.print(f"[green]✓[/] {ep.date}  {ep.title[:50]}  [dim]({size/1e6:.1f} MB)[/]")
-            print(path)                 # stdout: the saved file path
+            print(path)
             n += 1
+        return n
+    else:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[bold blue]{task.fields[label]}", justify="left"),
+            BarColumn(),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            DownloadColumn(),
+            TransferSpeedColumn(),
+            TimeRemainingColumn(),
+            console=ui,
+            transient=True,
+        ) as progress:
+            for ep in episodes:
+                task = progress.add_task("dl", label=ep.title[:34] or "episode", total=None)
+
+                def cb(done: int, total: int, _t=task) -> None:
+                    progress.update(_t, completed=done, total=(total or None))
+
+                try:
+                    path = core.download_episode(ep, out_dir, on_progress=cb)
+                except Exception as e:      # keep going on a single failure
+                    progress.console.print(f"[red]✗[/] {ep.title[:50]}: {e}")
+                    continue
+                progress.remove_task(task)
+                size = os.path.getsize(path)
+                ui.print(f"[green]✓[/] {ep.date}  {ep.title[:50]}  [dim]({size/1e6:.1f} MB)[/]")
+                print(path)                 # stdout: the saved file path
+                n += 1
+
     return n
 
 
@@ -114,7 +136,7 @@ def cmd_info(args) -> int:
     if kind not in ("apple_show", "rss"):
         _err("info needs a show URL/id or RSS feed (not an episode link)")
         return 1
-    show = _resolve_show(kind, s)
+    show = _resolve_show(kind, s, args)
     latest = show.episodes[0] if show.episodes else None
     table = Table(show_header=False, box=None, pad_edge=False)
     table.add_column(style="bold cyan", no_wrap=True)
@@ -136,7 +158,7 @@ def cmd_list(args) -> int:
     if kind not in ("apple_show", "rss"):
         _err("list needs a show URL/id or RSS feed (not an episode link)")
         return 1
-    show = _resolve_show(kind, s)
+    show = _resolve_show(kind, s, args)
     eps = core.select(show.episodes, match=args.match) if args.match else show.episodes
     if not args.all and not args.match:
         eps = eps[: args.limit]
@@ -184,14 +206,20 @@ def cmd_get(args) -> int:
 
     # --- pasted episode links: download immediately ----------------------- #
     if kind == "xyz_episode":
-        with ui.status("[cyan]Resolving xiaoyuzhou episode…"):
+        if args.quiet:
             url, title = core.xyz_episode_to_audio(s)
+        else:
+            with ui.status("[cyan]Resolving xiaoyuzhou episode…"):
+                url, title = core.xyz_episode_to_audio(s)
         return 0 if _download_all([core.Episode(title=title, pub="", url=url,
-                                                mime="audio/mp4")], out) else 1
+                                                mime="audio/mp4")], out, args) else 1
 
     if kind == "apple_episode":
-        with ui.status("[cyan]Resolving Apple episode…"):
+        if args.quiet:
             url, title, rel = core.apple_episode_to_audio(s)
+        else:
+            with ui.status("[cyan]Resolving Apple episode…"):
+                url, title, rel = core.apple_episode_to_audio(s)
         if not url:
             _err("episode beyond recent catalog; trying yt-dlp")
             return _ytdlp_fallback(s, out)
@@ -201,21 +229,21 @@ def cmd_get(args) -> int:
         except Exception:
             pub = ""
         return 0 if _download_all([core.Episode(title=title or "episode", pub=pub,
-                                                url=url)], out) else 1
+                                                url=url)], out, args) else 1
 
     # --- show / rss: select then download --------------------------------- #
-    show = _resolve_show(kind, s)
+    show = _resolve_show(kind, s, args)
     sel = core.select(show.episodes, match=args.match, latest=args.latest, index=args.index)
 
     if not sel and not (args.match or args.latest or args.index):
-        # no selector given -> interactive picker, or list+hint if not a TTY
-        if _interactive() and not args.no_input:
+        # no selector given -> interactive picker, or list+hint if not a TTY (quiet mode disables picker)
+        if not args.quiet and _interactive() and not args.no_input:
             sel = _interactive_select(show)
             if not sel:
                 _err("nothing selected")
                 return 1
         else:
-            cmd_list(argparse.Namespace(src=s, match=None, all=False, limit=20))
+            cmd_list(argparse.Namespace(src=s, match=None, all=False, limit=20, quiet=args.quiet))
             _err("no selector and not an interactive terminal — pass "
                  "--match RE / --latest N / --index 0,2")
             return 1
@@ -228,8 +256,9 @@ def cmd_get(args) -> int:
     target = out
     if len(sel) > 1:
         target = os.path.join(out, core.safe_filename(show.title))
-    ui.print(f"[bold]Downloading {len(sel)} episode(s)[/] from “{show.title}” → [dim]{target}[/]")
-    return 0 if _download_all(sel, target) else 1
+    if not args.quiet:
+        ui.print(f"[bold]Downloading {len(sel)} episode(s)[/] from “{show.title}” → [dim]{target}[/]")
+    return 0 if _download_all(sel, target, args) else 1
 
 
 # --------------------------------------------------------------------------- #
@@ -344,6 +373,7 @@ def build_parser() -> argparse.ArgumentParser:
                        description="Download one or more episodes. With a show/feed and no selector, "
                                    "opens an interactive multi-select picker. `podpull pull` is an alias.",
                        epilog=EXAMPLES)
+    s.add_argument("-q", "--quiet", action="store_true", help="quiet mode; suppresses spinner and progress bar")
     s.add_argument("src", help="show URL/id, RSS URL, or a single-episode link")
     g = s.add_argument_group("episode selection (omit all → interactive picker)")
     g.add_argument("--match", metavar="RE", help="case-insensitive title regex")

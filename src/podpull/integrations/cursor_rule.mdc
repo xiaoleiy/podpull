@@ -14,11 +14,13 @@ Commands:
 - `podpull list <src> [--match RE] [--all]` — list episodes; index 0 = newest.
 - `podpull get <src> --match RE | --latest N | --index 0,2` — download (alias: `pull`).
 - `podpull get <episode-url>` — a pasted Apple `?i=` or xiaoyuzhou link.
-
+- `podpull get <src> ... -q/--quiet` — suppress spinner/progress bar.
 `<src>` = Apple show URL · bare Apple ID · RSS feed URL · Apple episode URL · xiaoyuzhou link.
 
 Rules:
 - Always pass a selector and `--no-input`; a bare `podpull get <show>` opens an interactive picker
   that can't be driven from the agent.
+- Also pass `-q`/`--quiet` — the spinner/progress bar are pointless outside a live terminal; stdout
+  output (the saved file path) is unaffected.
 - File path prints to stdout, progress to stderr. Default output `~/Downloads/Podcasts` (`--out` to change).
 - Multiple episodes → per-show folder; filenames are normalized to be cloud-storage-safe (CJK kept).
