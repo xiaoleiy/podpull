@@ -144,7 +144,21 @@ Drive, OneDrive, Dropbox, iCloud, etc. (CJK and ordinary text are kept). When yo
 **multiple** episodes at once, they're placed in a sub-folder named after the show.
 
 `<src>` accepts: an Apple show URL, a bare Apple ID, a raw RSS feed URL, an Apple
-episode URL (`?i=`), or a xiaoyuzhou episode URL.
+episode URL (`?i=`), a xiaoyuzhou episode URL, or a Ximalaya album URL
+(`ximalaya.com/album/<id>`).
+
+### Podcast Index (optional)
+
+podpull can enrich `search` and feed resolution with the open
+[Podcast Index](https://podcastindex.org) directory. Get a free API key at
+[api.podcastindex.org](https://api.podcastindex.org/signup) and set:
+
+```bash
+export PODCASTINDEX_API_KEY=...
+export PODCASTINDEX_API_SECRET=...
+```
+
+Without these, podpull behaves exactly as before (iTunes only).
 
 ## Roadmap
 

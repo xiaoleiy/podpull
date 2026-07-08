@@ -24,3 +24,4 @@ Rules:
   output (the saved file path) is unaffected.
 - File path prints to stdout, progress to stderr. Default output `~/Downloads/Podcasts` (`--out` to change).
 - Multiple episodes → per-show folder; filenames are normalized to be cloud-storage-safe (CJK kept).
+- Optional: if PODCASTINDEX_API_KEY/PODCASTINDEX_API_SECRET are set, `search` also queries Podcast Index and feed resolution gains a fallback; ximalaya.com/album/<id> links work as a source.

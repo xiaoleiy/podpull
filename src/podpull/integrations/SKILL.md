@@ -48,6 +48,7 @@ podpull get   <src> ... -q / --quiet         # suppress spinner/progress bar
 - Downloads default to `~/Downloads/Podcasts`; pass `--out DIR` to change.
 - Selecting **multiple** episodes creates a per-show sub-folder. Filenames are normalized to be
   cloud-storage-safe (emoji/illegal characters removed; CJK kept).
+- Optional: if PODCASTINDEX_API_KEY/PODCASTINDEX_API_SECRET are set, `search` also queries Podcast Index and feed resolution gains a fallback; ximalaya.com/album/<id> links work as a source.
 
 ## Examples
 

@@ -3,6 +3,22 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
+## [0.6.0] — 2026-07-07
+
+### Added
+- Robust feed parsing: RSS 2.0 / RSS 1.0 (RDF) / Atom, any-namespace matching,
+  `media:content` + Atom-enclosure fallbacks, dirty-XML sanitize-and-retry
+  (undefined entities, bare `&`, control chars), ISO-8601 dates.
+- Verified against Chinese-market hosts: xiaoyuzhou, Ximalaya, SoundOn, Firstory,
+  WavPub, Typlog, Fireside, Lizhi (offline fixtures + `pytest -m network` live suite).
+- `ximalaya.com/album/<id>` links are now accepted directly.
+- Optional Podcast Index support (BYOK: `PODCASTINDEX_API_KEY`/`_SECRET`):
+  enriches `search` and adds a feed-resolution fallback when iTunes has no feed.
+
+### Fixed
+- Download guard: `text/*` responses (stale enclosures, e.g. Ximalaya CDN) now
+  error instead of writing a garbage audio file.
+
 ## [0.5.1] — 2026-06-30
 
 ### Fixed
