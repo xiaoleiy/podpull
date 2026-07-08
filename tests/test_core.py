@@ -17,6 +17,8 @@ FEED_CASES = [
      "https://cdn.example.test/rdf1.mp3", "2026-06-30"),
     ("atom.xml", "Atom Show", "Atom Author", 1,
      "https://cdn.example.test/atom1.mp3", "2026-07-01"),
+    ("itunes_title_order.xml", "Real Channel Title", "Order Author", 1,
+     "https://cdn.example.test/order1.mp3", "2026-07-04"),
 ]
 
 
@@ -34,6 +36,8 @@ def test_parse_feed_fixture(monkeypatch, fname, title, author, count, first_url,
     assert len(eps) == count
     assert eps[0].url == first_url
     assert eps[0].date == first_date
+    if fname == "itunes_title_order.xml":
+        assert eps[0].title == "Real Episode Title"
 
 
 def test_classify():

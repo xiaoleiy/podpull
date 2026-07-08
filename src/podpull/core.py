@@ -129,11 +129,17 @@ def _clean(text) -> str:
 
 
 def _first_text(el, *names) -> str:
-    """First non-empty direct-child text whose localname is in names."""
+    """First non-empty direct-child text whose localname is in names.
+    Bare (un-namespaced) tags win over namespaced synonyms, so a real
+    <title> beats <itunes:title> regardless of document order."""
     wanted = {n.lower() for n in names}
-    for child in el:
-        if _localname(child.tag) in wanted and _clean(child.text):
-            return _clean(child.text)
+    candidates = [c for c in el if _localname(c.tag) in wanted]
+    for c in candidates:
+        if isinstance(c.tag, str) and "}" not in c.tag and _clean(c.text):
+            return _clean(c.text)
+    for c in candidates:
+        if _clean(c.text):
+            return _clean(c.text)
     return ""
 
 

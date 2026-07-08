@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <itunes:title>Short Channel</itunes:title>
+    <title>Real Channel Title</title>
+    <itunes:author>Order Author</itunes:author>
+    <item>
+      <itunes:title>Short EP</itunes:title>
+      <title>Real Episode Title</title>
+      <pubDate>Sat, 04 Jul 2026 08:00:00 GMT</pubDate>
+      <enclosure url="https://cdn.example.test/order1.mp3" type="audio/mpeg"/>
+    </item>
+  </channel>
+</rss>
