@@ -43,7 +43,8 @@ class Episode:
     def date(self) -> str:
         for parse in (
             lambda s: parsedate_to_datetime(s),                                   # RFC-822
-            lambda s: datetime.fromisoformat(s.strip().replace("Z", "+00:00")),   # ISO-8601
+            lambda s: datetime.fromisoformat(                                     # ISO-8601
+                re.sub(r"([+-]\d{2})(\d{2})$", r"\1:\2", s.strip().replace("Z", "+00:00"))),
         ):
             try:
                 return parse(self.pub).strftime("%Y-%m-%d")

@@ -171,6 +171,8 @@ def test_episode_date():
     # ISO-8601 (Atom published / dc:date), with and without Z
     assert Episode(title="x", pub="2026-07-01T08:30:00Z", url="u").date == "2026-07-01"
     assert Episode(title="x", pub="2026-07-01T08:30:00+08:00", url="u").date == "2026-07-01"
+    # ISO-8601 with colon-less offset (py3.9's fromisoformat rejects it raw)
+    assert Episode(title="x", pub="2026-07-01T08:30:00+0800", url="u").date == "2026-07-01"
     assert Episode(title="x", pub="", url="u").date == "0000-00-00"
 
 
