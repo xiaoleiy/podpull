@@ -30,5 +30,5 @@ def test_live_feed_parses(label, feed):
 
 
 def test_live_itunes_resolution():
-    feed, name, _author, pid = core.apple_show_to_feed("1478791559")  # 忽左忽右
-    assert feed.startswith("http") and pid == "1478791559" and name
+    feed, name, _author, pid = core.apple_show_to_feed("1493503146")  # 忽左忽右
+    assert feed.startswith("http") and pid == "1493503146" and name
