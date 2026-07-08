@@ -119,6 +119,10 @@ def test_classify():
     assert core.classify("https://podcasts.apple.com/us/podcast/x/id123?i=456")[0] == "apple_episode"
     assert core.classify("https://www.xiaoyuzhoufm.com/episode/abc")[0] == "xyz_episode"
     assert core.classify("https://feed.firstory.me/rss/user/xyz")[0] == "rss"
+    assert core.classify("https://www.ximalaya.com/album/51076156") == \
+        ("rss", "https://www.ximalaya.com/album/51076156.xml")
+    assert core.classify("https://www.ximalaya.com/album/51076156.xml") == \
+        ("rss", "https://www.ximalaya.com/album/51076156.xml")
     with pytest.raises(ValueError):
         core.classify("not a url")
 

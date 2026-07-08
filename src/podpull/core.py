@@ -76,7 +76,7 @@ def fetch_json(url: str):
 # --------------------------------------------------------------------------- #
 def classify(src: str) -> tuple[str, str]:
     """Return (kind, normalized_src). kind ∈ {apple_show, apple_episode,
-    xyz_episode, rss}."""
+    xyz_episode, rss}. Ximalaya album links normalize to rss with .xml extension."""
     s = src.strip()
     if re.fullmatch(r"\d+", s):
         return "apple_show", s
@@ -86,6 +86,9 @@ def classify(src: str) -> tuple[str, str]:
         return "apple_episode", s
     if "podcasts.apple.com" in s:
         return "apple_show", s
+    m = re.search(r"ximalaya\.com/album/(\d+)", s)
+    if m:  # Ximalaya Podcast托管 albums expose RSS at album/<id>.xml
+        return "rss", f"https://www.ximalaya.com/album/{m.group(1)}.xml"
     if s.startswith("http"):
         return "rss", s
     raise ValueError(f"Cannot classify input: {src!r}")
