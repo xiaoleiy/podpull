@@ -40,3 +40,9 @@ packages = ["src/podpull"]
 [tool.ruff]
 line-length = 100
 target-version = "py39"
+
+[tool.pytest.ini_options]
+markers = [
+    "network: hits live podcast hosts; excluded by default (run: pytest -m network)",
+]
+addopts = "-m 'not network'"
