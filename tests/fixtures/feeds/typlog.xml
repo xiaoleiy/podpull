@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>疯投圈</title>
+    <itunes:author>黄海、Rio</itunes:author>
+    <item>
+      <title>76. 咖啡 &amp; 茶饮：新消费的&#38472;年老酒</title>
+      <pubDate>Fri, 03 Jul 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://rio.xyzcdn.net/crazy-capital/ep76.m4a" type="audio/mp4" length="9"/>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>大内密谈</title>
+    <itunes:author>大内密谈</itunes:author>
+    <item>
+      <title>vol.1200 深夜谈谈</title>
+      <pubDate>Sun, 5 Jul 2026 21:00:00 +0800</pubDate>
+      <enclosure url="http://cdn.lizhi.fm/audio/2026/07/05/1200.mp3" type="audio/mpeg" length="8"/>
+    </item>
+  </channel>
+</rss>

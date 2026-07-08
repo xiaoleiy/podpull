@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Libsyn Show</title>
+    <itunes:author>Libsyn Author</itunes:author>
+    <item>
+      <title>Libsyn EP1</title>
+      <pubDate>Mon, 29 Jun 2026 09:00:00 +0000</pubDate>
+      <enclosure url="https://traffic.libsyn.com/secure/example/ep1.mp3?dest-id=1" type="audio/mpeg" length="13"/>
+    </item>
+  </channel>
+</rss>

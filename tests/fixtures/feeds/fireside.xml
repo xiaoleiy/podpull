@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:podcast="https://podcastindex.org/namespace/1.0">
+  <channel>
+    <title>科技早知道</title>
+    <itunes:author>声动活泼</itunes:author>
+    <podcast:locked>no</podcast:locked>
+    <item>
+      <title>S8E20 硅谷现场</title>
+      <pubDate>Thu, 02 Jul 2026 08:00:00 +0800</pubDate>
+      <enclosure url="https://aphid.fireside.fm/d/1437767933/s8e20.mp3" type="audio/mpeg" length="10"/>
+    </item>
+  </channel>
+</rss>

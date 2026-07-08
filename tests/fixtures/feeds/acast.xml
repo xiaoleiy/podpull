@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:acast="https://schema.acast.com/1.0/">
+  <channel>
+    <title>不明白播客</title>
+    <itunes:author>袁莉和她的朋友们</itunes:author>
+    <acast:showId>68004395b4ef799a7a410371</acast:showId>
+    <item>
+      <title>EP-100 访谈</title>
+      <pubDate>Tue, 30 Jun 2026 22:00:00 GMT</pubDate>
+      <enclosure url="https://sphinx.acast.com/p/open/s/68004395/e/100/media.mp3" type="audio/mpeg" length="12"/>
+    </item>
+  </channel>
+</rss>

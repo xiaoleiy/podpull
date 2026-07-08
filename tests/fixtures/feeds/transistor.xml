@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Transistor Show</title>
+    <itunes:author>Transistor Author</itunes:author>
+    <item>
+      <title>Transistor EP1</title>
+      <pubDate>Sun, 28 Jun 2026 09:00:00 +0000</pubDate>
+      <enclosure url="https://media.transistor.fm/abc123/ep1.mp3" type="audio/mpeg" length="14"/>
+    </item>
+  </channel>
+</rss>

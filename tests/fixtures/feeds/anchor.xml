@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>台灣通勤第一品牌</title>
+    <itunes:author>台通</itunes:author>
+    <item>
+      <title>EP600 通勤路上</title>
+      <pubDate>Wed, 01 Jul 2026 16:00:00 GMT</pubDate>
+      <enclosure url="https://anchor.fm/s/1ea77470/podcast/play/999/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2Fep600.m4a" type="audio/x-m4a" length="11"/>
+    </item>
+  </channel>
+</rss>

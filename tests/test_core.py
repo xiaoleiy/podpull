@@ -40,6 +40,21 @@ FEED_CASES = [
     ("firstory.xml", "百靈果 News", "百靈果 News", 1,
      "https://m.cdn.firstory.me/track/cmjaz594i/https%3A%2F%2Ffile.cdn.firstory.me%2Fstory%2Fep500.mp3",
      "2026-07-04"),
+    ("lizhi.xml", "大内密谈", "大内密谈", 1,
+     "http://cdn.lizhi.fm/audio/2026/07/05/1200.mp3", "2026-07-05"),
+    ("typlog.xml", "疯投圈", "黄海、Rio", 1,
+     "https://rio.xyzcdn.net/crazy-capital/ep76.m4a", "2026-07-03"),
+    ("fireside.xml", "科技早知道", "声动活泼", 1,
+     "https://aphid.fireside.fm/d/1437767933/s8e20.mp3", "2026-07-02"),
+    ("anchor.xml", "台灣通勤第一品牌", "台通", 1,
+     "https://anchor.fm/s/1ea77470/podcast/play/999/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2Fep600.m4a",
+     "2026-07-01"),
+    ("acast.xml", "不明白播客", "袁莉和她的朋友们", 1,
+     "https://sphinx.acast.com/p/open/s/68004395/e/100/media.mp3", "2026-06-30"),
+    ("libsyn.xml", "Libsyn Show", "Libsyn Author", 1,
+     "https://traffic.libsyn.com/secure/example/ep1.mp3?dest-id=1", "2026-06-29"),
+    ("transistor.xml", "Transistor Show", "Transistor Author", 1,
+     "https://media.transistor.fm/abc123/ep1.mp3", "2026-06-28"),
 ]
 
 
