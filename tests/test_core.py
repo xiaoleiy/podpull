@@ -19,6 +19,12 @@ FEED_CASES = [
      "https://cdn.example.test/atom1.mp3", "2026-07-01"),
     ("itunes_title_order.xml", "Real Channel Title", "Order Author", 1,
      "https://cdn.example.test/order1.mp3", "2026-07-04"),
+    ("media_content_only.xml", "MRSS Show", "editor@example.test (MRSS Author)", 1,
+     "https://cdn.example.test/mrss1.mp3", "2026-07-02"),
+    ("wavpub.xml", "半拿铁 | 商业沉浮录", "潇磊布道", 1,
+     "https://tk.wavpub.com/track/caffebreve/91.m4a", "2026-07-01"),
+    ("omny.xml", "馬力歐陪你喝一杯", "鏡好聽", 1,
+     "https://omny.example.test/ep388.mp3", "2026-06-30"),
 ]
 
 

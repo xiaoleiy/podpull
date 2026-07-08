@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:media="http://search.yahoo.com/mrss/" xmlns:wavpub="https://wavpub.com/rss">
+  <channel>
+    <title>半拿铁 | 商业沉浮录</title>
+    <itunes:author>潇磊布道</itunes:author>
+    <item>
+      <title><![CDATA[91. 蜜雪冰城：贫穷限制了它的想象]]></title>
+      <pubDate>Wed, 01 Jul 2026 22:00:00 +0800</pubDate>
+      <guid>wavpub-91</guid>
+      <enclosure url="https://tk.wavpub.com/track/caffebreve/91.m4a" type="audio/x-m4a" length="2"/>
+      <media:content url="https://tk.wavpub.com/media/caffebreve/91.m4a" type="audio/x-m4a"/>
+    </item>
+  </channel>
+</rss>

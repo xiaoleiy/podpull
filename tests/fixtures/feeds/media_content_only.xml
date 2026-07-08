@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <title>MRSS Show</title>
+    <managingEditor>editor@example.test (MRSS Author)</managingEditor>
+    <item>
+      <title>MRSS EP1</title>
+      <pubDate>Thu, 02 Jul 2026 08:00:00 GMT</pubDate>
+      <media:content url="https://cdn.example.test/cover.jpg" type="image/jpeg"/>
+      <media:content url="https://cdn.example.test/mrss1.mp3" type="audio/mpeg"/>
+    </item>
+  </channel>
+</rss>

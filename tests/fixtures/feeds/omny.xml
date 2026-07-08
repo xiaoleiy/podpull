@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <title>馬力歐陪你喝一杯</title>
+    <itunes:author>鏡好聽</itunes:author>
+    <item>
+      <title>EP388 對談</title>
+      <pubDate>Tue, 30 Jun 2026 20:00:00 +0800</pubDate>
+      <enclosure url="https://omny.example.test/ep388.mp3" type="audio/mpeg" length="3"/>
+      <media:content url="https://omny.example.test/ep388.mp3" type="audio/mpeg"/>
+      <media:content url="https://omny.example.test/ep388.jpg" type="image/jpeg"/>
+    </item>
+  </channel>
+</rss>
