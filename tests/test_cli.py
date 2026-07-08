@@ -5,6 +5,8 @@ import os
 import sys
 import types
 
+import pytest
+
 from podpull import cli, core
 from rich.console import Console
 
@@ -168,3 +170,49 @@ def test_get_quiet_continues_after_one_failure(monkeypatch, tmp_path):
     assert os.path.exists(os.path.join(show_dir, "EP0.mp3"))
     assert os.path.exists(os.path.join(show_dir, "EP2.mp3"))
     assert not os.path.exists(os.path.join(show_dir, "EP1.mp3"))
+
+
+def _search_args(term="故事"):
+    return argparse.Namespace(term=term, limit=10, country="US")
+
+
+def test_search_without_keys_never_calls_pi(monkeypatch):
+    monkeypatch.setattr(core, "pi_credentials", lambda: None)
+    monkeypatch.setattr(core, "search_shows", lambda term, limit, country: [
+        {"collectionId": 1, "collectionName": "A", "artistName": "x",
+         "feedUrl": "https://f/a", "trackCount": 3}])
+    monkeypatch.setattr(core, "pi_search_shows",
+                        lambda *a, **k: pytest.fail("PI must not be called without keys"))
+    assert cli.cmd_search(_search_args()) == 0
+
+
+def test_search_merges_and_dedupes_pi(monkeypatch):
+    monkeypatch.setattr(core, "pi_credentials", lambda: ("k", "s"))
+    monkeypatch.setattr(core, "search_shows", lambda term, limit, country: [
+        {"collectionId": 1, "collectionName": "A", "artistName": "x",
+         "feedUrl": "https://f/a", "trackCount": 3}])
+    monkeypatch.setattr(core, "pi_search_shows", lambda term, limit: [
+        {"collectionId": 1, "collectionName": "A (PI)", "artistName": "x",
+         "feedUrl": "https://f/a/", "trackCount": 3},          # dup (trailing slash)
+        {"collectionId": 2, "collectionName": "B", "artistName": "y",
+         "feedUrl": "https://f/b", "trackCount": 9}])          # new
+    seen = []
+    monkeypatch.setattr(cli, "_render_search_table", lambda term, rows: seen.extend(rows))
+    assert cli.cmd_search(_search_args()) == 0
+    assert [r["collectionName"] for r in seen] == ["A", "B"]   # iTunes wins the dup
+
+
+def test_search_survives_one_backend_failing(monkeypatch):
+    monkeypatch.setattr(core, "pi_credentials", lambda: ("k", "s"))
+
+    def _boom(term, limit, country):
+        raise OSError("itunes down")
+    monkeypatch.setattr(core, "search_shows", _boom)
+    monkeypatch.setattr(core, "pi_search_shows", lambda term, limit: [
+        {"collectionId": 2, "collectionName": "B", "artistName": "y",
+         "feedUrl": "https://f/b", "trackCount": 9}])
+    assert cli.cmd_search(_search_args()) == 0                 # PI results still shown
+
+    monkeypatch.setattr(core, "pi_credentials", lambda: None)
+    with pytest.raises(OSError):                               # no keys -> unchanged behavior
+        cli.cmd_search(_search_args())

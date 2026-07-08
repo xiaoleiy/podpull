@@ -112,22 +112,53 @@ def _download_all(episodes: list[core.Episode], out_dir: str, args) -> int:
 # --------------------------------------------------------------------------- #
 # commands
 # --------------------------------------------------------------------------- #
-def cmd_search(args) -> int:
-    with ui.status(f"[cyan]Searching iTunes for “{args.term}”…"):
-        results = core.search_shows(args.term, limit=args.limit, country=args.country)
-    if not results:
-        _err("no shows found")
-        return 1
-    table = Table(title=f"Podcasts matching “{args.term}”", header_style="bold", expand=False)
+def _render_search_table(term: str, results: list) -> None:
+    table = Table(title=f"Podcasts matching “{term}”", header_style="bold", expand=False)
     table.add_column("Apple ID", style="cyan", no_wrap=True)
     table.add_column("Eps", justify="right", style="magenta")
     table.add_column("Show")
     table.add_column("Author", style="dim")
     for r in results:
-        table.add_row(str(r.get("collectionId")), str(r.get("trackCount") or "?"),
+        table.add_row(str(r.get("collectionId") or "—"), str(r.get("trackCount") or "?"),
                       r.get("collectionName") or "", r.get("artistName") or "")
     ui.print(table)
     ui.print("[dim]Next:[/] podpull list <Apple ID>  •  podpull get <Apple ID>")
+
+
+def _merge_results(primary: list, extra: list) -> list:
+    seen = {(r.get("feedUrl") or "").strip().rstrip("/") for r in primary}
+    seen.discard("")
+    merged = list(primary)
+    for r in extra:
+        key = (r.get("feedUrl") or "").strip().rstrip("/")
+        if key and key in seen:
+            continue
+        seen.add(key)
+        merged.append(r)
+    return merged
+
+
+def cmd_search(args) -> int:
+    results, warnings = [], []
+    with ui.status(f"[cyan]Searching for “{args.term}”…"):
+        if core.pi_credentials() is None:
+            # no PI keys -> exactly the old behavior (errors propagate to main)
+            results = core.search_shows(args.term, limit=args.limit, country=args.country)
+        else:
+            try:
+                results = core.search_shows(args.term, limit=args.limit, country=args.country)
+            except Exception as e:
+                warnings.append(f"iTunes search failed: {e}")
+            try:
+                results = _merge_results(results, core.pi_search_shows(args.term, limit=args.limit))
+            except Exception as e:
+                warnings.append(f"Podcast Index search failed: {e}")
+    for w in warnings:
+        _err(w)
+    if not results:
+        _err("no shows found")
+        return 1
+    _render_search_table(args.term, results)
     return 0
 
 
@@ -336,6 +367,9 @@ EXAMPLES = """
 
 [dim]<src> = Apple show URL · bare Apple ID · RSS feed URL · Apple ?i= episode URL · xiaoyuzhou link[/]
 [dim]Downloads default to ~/Downloads/Podcasts (override with --out).[/]
+
+[dim]Optional: set PODCASTINDEX_API_KEY + PODCASTINDEX_API_SECRET (free — podcastindex.org)[/]
+[dim]to enrich search results and add a feed-resolution fallback.[/]
 """
 
 
