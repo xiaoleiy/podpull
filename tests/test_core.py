@@ -186,3 +186,25 @@ def test_select_index():
 
 def test_select_none():
     assert core.select(_eps()) == []
+
+
+def test_fetch_and_download_send_browser_ua(monkeypatch, tmp_path):
+    seen = []
+
+    class _Resp(io.BytesIO):
+        status = 200
+        length = 2
+        headers = {"Content-Type": "audio/mpeg"}
+
+        def __init__(self):
+            super().__init__(b"ok")
+
+    def fake_urlopen(req, timeout=None):
+        seen.append(req.get_header("User-agent"))
+        return _Resp()
+
+    monkeypatch.setattr(core.urllib.request, "urlopen", fake_urlopen)
+    core.fetch("https://feeds.soundon.fm/x.xml")
+    core.download_url("https://cdn.lizhi.fm/a.mp3", str(tmp_path / "a.mp3"))
+    assert seen == [core.UA, core.UA]
+    assert all("mozilla" in ua.lower() and "python" not in ua.lower() for ua in seen)
