@@ -1,6 +1,7 @@
 """CLI wiring tests (no network, no real TTY)."""
 import argparse
 import io
+import json
 import os
 import sys
 import types
@@ -9,6 +10,17 @@ import pytest
 
 from podpull import cli, core
 from rich.console import Console
+
+
+def _ns(**kw):
+    """Namespace with defaults so tests need not pass every flag."""
+    base = dict(
+        json=False, quiet=False, no_input=False, match=None, latest=None,
+        index=None, all=False, limit=40, country="US", term="故事", src="123",
+        out=".",
+    )
+    base.update(kw)
+    return argparse.Namespace(**base)
 
 def _show():
     eps = [core.Episode(title=f"EP{i}", pub="Sat, 27 Jun 2026 22:02:06 GMT", url=f"u{i}")
@@ -216,3 +228,81 @@ def test_search_survives_one_backend_failing(monkeypatch):
     monkeypatch.setattr(core, "pi_credentials", lambda: None)
     with pytest.raises(OSError):                               # no keys -> unchanged behavior
         cli.cmd_search(_search_args())
+
+
+def test_json_search(monkeypatch, capsys):
+    monkeypatch.setattr(core, "pi_credentials", lambda: None)
+    monkeypatch.setattr(core, "search_shows", lambda term, limit, country: [
+        {"collectionId": 1, "collectionName": "A", "artistName": "x",
+         "feedUrl": "https://f/a", "trackCount": 3}])
+    buf = io.StringIO()
+    monkeypatch.setattr(cli, "ui", Console(file=buf, stderr=True))
+    rc = cli.cmd_search(_ns(term="故事", json=True, limit=10))
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out == {"query": "故事", "results": [
+        {"apple_id": "1", "title": "A", "author": "x",
+         "episode_count": 3, "feed_url": "https://f/a"}]}
+    assert "Podcasts matching" not in buf.getvalue()
+
+
+def test_json_info(monkeypatch, capsys):
+    monkeypatch.setattr(cli.core, "classify", lambda s: ("apple_show", s))
+    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s, args=None: _show())
+    buf = io.StringIO()
+    monkeypatch.setattr(cli, "ui", Console(file=buf, stderr=True))
+    rc = cli.cmd_info(_ns(src="123", json=True))
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["title"] == "Demo Show"
+    assert out["episode_count"] == 3
+    assert out["latest"]["index"] == 0
+    assert out["latest"]["title"] == "EP0"
+    assert out["latest"]["url"] == "u0"
+    assert buf.getvalue() == ""
+
+
+def test_json_list_limit(monkeypatch, capsys):
+    monkeypatch.setattr(cli.core, "classify", lambda s: ("apple_show", s))
+    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s, args=None: _show())
+    rc = cli.cmd_list(_ns(src="123", json=True, limit=2, match=None, all=False))
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert len(out["episodes"]) == 2
+    assert out["episodes"][0]["index"] == 0
+    assert out["episodes"][1]["title"] == "EP1"
+
+
+def test_json_get_emits_downloads(monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(cli.core, "classify", lambda s: ("apple_show", s))
+    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s, args=None: _show())
+    got = _record_downloads(monkeypatch)
+    buf = io.StringIO()
+    monkeypatch.setattr(cli, "ui", Console(file=buf, stderr=True))
+    rc = cli.cmd_get(_ns(src="123", latest=1, out=str(tmp_path), json=True))
+    assert rc == 0
+    assert got == ["EP0"]
+    out = json.loads(capsys.readouterr().out)
+    assert out["show"]["title"] == "Demo Show"
+    assert len(out["downloads"]) == 1
+    assert out["downloads"][0]["title"] == "EP0"
+    assert out["downloads"][0]["path"].endswith("EP0.mp3")
+    assert buf.getvalue() == ""
+
+
+def test_json_get_no_selector_exits(monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(cli.core, "classify", lambda s: ("apple_show", s))
+    monkeypatch.setattr(cli, "_resolve_show", lambda kind, s, args=None: _show())
+    monkeypatch.setattr(cli, "_interactive", lambda: True)
+    got = _record_downloads(monkeypatch)
+    rc = cli.cmd_get(_ns(src="123", out=str(tmp_path), json=True))
+    assert rc == 1
+    assert got == []
+    raw = capsys.readouterr().out.strip()
+    assert raw == "" or not raw.startswith("{")
+
+
+def test_parser_accepts_root_json():
+    args = cli.build_parser().parse_args(["--json", "search", "foo"])
+    assert args.json is True
+    assert args.term == "foo"
