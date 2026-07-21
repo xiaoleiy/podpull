@@ -7,6 +7,7 @@ printed to stdout (scriptable); everything else goes to stderr.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -38,14 +39,41 @@ def _interactive() -> bool:
     return sys.stdin.isatty() and sys.stderr.isatty()
 
 
+def _want_json(args) -> bool:
+    return bool(getattr(args, "json", False))
+
+
+def _is_quiet(args) -> bool:
+    """True when UI should be suppressed (--quiet or --json)."""
+    return bool(getattr(args, "quiet", False) or getattr(args, "json", False))
+
+
+def _emit_json(obj) -> None:
+    print(json.dumps(obj, ensure_ascii=False, indent=2))
+
+
+def _episode_dict(ep: core.Episode, index: int | None = None) -> dict:
+    d: dict = {"date": ep.date, "title": ep.title, "url": ep.url}
+    if index is not None:
+        d = {"index": index, **d}
+    return d
+
+
+def _show_dict(show: core.Show, *, author: bool = True, apple_id: bool = True) -> dict:
+    d: dict = {"title": show.title, "feed": show.feed}
+    if author:
+        d["author"] = show.author or ""
+    if apple_id:
+        d["apple_id"] = show.apple_id or ""
+    return d
+
+
 # --------------------------------------------------------------------------- #
 # shared helpers
 # --------------------------------------------------------------------------- #
 def _resolve_show(kind: str, s: str, args) -> core.Show:
     """Resolve a show/feed with step-by-step spinner feedback."""
-    quiet = getattr(args, "quiet", False)
-    if quiet:
-        # quiet mode: no spinner
+    if _is_quiet(args):
         if kind == "apple_show":
             feed, name, author, pid = core.apple_show_to_feed(s)
         else:
@@ -63,50 +91,62 @@ def _resolve_show(kind: str, s: str, args) -> core.Show:
                      author=author or feed_author, apple_id=pid, episodes=eps)
 
 
-def _download_all(episodes: list[core.Episode], out_dir: str, args) -> int:
-    """Download episodes with a live per-file progress bar."""
+def _download_all(episodes: list[core.Episode], out_dir: str, args
+                  ) -> tuple[int, list[dict]]:
+    """Download episodes. Returns (success_count, download_records).
+
+    When not --json, also prints each path to stdout. Records are always
+    collected so --json callers can emit a document.
+    """
     n = 0
-    if args.quiet:
-        # quiet mode: no progress bar
+    records: list[dict] = []
+    as_json = _want_json(args)
+
+    def _ok(ep: core.Episode, path: str) -> None:
+        nonlocal n
+        records.append({"date": ep.date, "title": ep.title, "url": ep.url, "path": path})
+        if not as_json:
+            print(path)
+        n += 1
+
+    if _is_quiet(args):
         for ep in episodes:
             try:
                 path = core.download_episode(ep, out_dir)
             except Exception as e:
                 _err(f"{ep.title[:50]}: {e}")
                 continue
-            print(path)
-            n += 1
-        return n
-    else:
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[bold blue]{task.fields[label]}", justify="left"),
-            BarColumn(),
-            "[progress.percentage]{task.percentage:>3.0f}%",
-            DownloadColumn(),
-            TransferSpeedColumn(),
-            TimeRemainingColumn(),
-            console=ui,
-            transient=True,
-        ) as progress:
-            for ep in episodes:
-                task = progress.add_task("dl", label=ep.title[:34] or "episode", total=None)
+            _ok(ep, path)
+        return n, records
 
-                def cb(done: int, total: int, _t=task) -> None:
-                    progress.update(_t, completed=done, total=(total or None))
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[bold blue]{task.fields[label]}", justify="left"),
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        DownloadColumn(),
+        TransferSpeedColumn(),
+        TimeRemainingColumn(),
+        console=ui,
+        transient=True,
+    ) as progress:
+        for ep in episodes:
+            task = progress.add_task("dl", label=ep.title[:34] or "episode", total=None)
 
-                try:
-                    path = core.download_episode(ep, out_dir, on_progress=cb)
-                except Exception as e:      # keep going on a single failure
-                    progress.console.print(f"[red]✗[/] {ep.title[:50]}: {e}")
-                    continue
-                progress.remove_task(task)
-                size = os.path.getsize(path)
-                ui.print(f"[green]✓[/] {ep.date}  {ep.title[:50]}  [dim]({size/1e6:.1f} MB)[/]")
-                print(path)                 # stdout: the saved file path
-                n += 1
+            def cb(done: int, total: int, _t=task) -> None:
+                progress.update(_t, completed=done, total=(total or None))
 
-    return n
+            try:
+                path = core.download_episode(ep, out_dir, on_progress=cb)
+            except Exception as e:      # keep going on a single failure
+                progress.console.print(f"[red]✗[/] {ep.title[:50]}: {e}")
+                continue
+            progress.remove_task(task)
+            size = os.path.getsize(path)
+            ui.print(f"[green]✓[/] {ep.date}  {ep.title[:50]}  [dim]({size/1e6:.1f} MB)[/]")
+            _ok(ep, path)
+
+    return n, records
 
 
 # --------------------------------------------------------------------------- #
@@ -140,9 +180,10 @@ def _merge_results(primary: list, extra: list) -> list:
 
 def cmd_search(args) -> int:
     results, warnings = [], []
-    with ui.status(f"[cyan]Searching for “{args.term}”…"):
+
+    def _run_search() -> None:
+        nonlocal results
         if core.pi_credentials() is None:
-            # no PI keys -> exactly the old behavior (errors propagate to main)
             results = core.search_shows(args.term, limit=args.limit, country=args.country)
         else:
             try:
@@ -153,11 +194,35 @@ def cmd_search(args) -> int:
                 results = _merge_results(results, core.pi_search_shows(args.term, limit=args.limit))
             except Exception as e:
                 warnings.append(f"Podcast Index search failed: {e}")
+
+    if _is_quiet(args):
+        _run_search()
+    else:
+        with ui.status(f"[cyan]Searching for “{args.term}”…"):
+            _run_search()
     for w in warnings:
         _err(w)
     if not results:
         _err("no shows found")
         return 1
+    if _want_json(args):
+        rows = []
+        for r in results:
+            tc = r.get("trackCount")
+            try:
+                ep_count = int(tc) if tc is not None and tc != "" else None
+            except (TypeError, ValueError):
+                ep_count = None
+            cid = r.get("collectionId")
+            rows.append({
+                "apple_id": str(cid) if cid is not None and cid != "" else "",
+                "title": r.get("collectionName") or "",
+                "author": r.get("artistName") or "",
+                "episode_count": ep_count,
+                "feed_url": r.get("feedUrl") or "",
+            })
+        _emit_json({"query": args.term, "results": rows})
+        return 0
     _render_search_table(args.term, results)
     return 0
 
@@ -169,6 +234,16 @@ def cmd_info(args) -> int:
         return 1
     show = _resolve_show(kind, s, args)
     latest = show.episodes[0] if show.episodes else None
+    if _want_json(args):
+        _emit_json({
+            "title": show.title,
+            "author": show.author or "",
+            "apple_id": show.apple_id or "",
+            "feed": show.feed,
+            "episode_count": len(show.episodes),
+            "latest": (_episode_dict(latest, index=0) if latest else None),
+        })
+        return 0
     table = Table(show_header=False, box=None, pad_edge=False)
     table.add_column(style="bold cyan", no_wrap=True)
     table.add_column()
@@ -196,6 +271,12 @@ def cmd_list(args) -> int:
     if not eps:
         _err("no episodes matched")
         return 1
+    if _want_json(args):
+        _emit_json({
+            "show": _show_dict(show),
+            "episodes": [_episode_dict(e, index=i) for i, e in enumerate(eps)],
+        })
+        return 0
     table = Table(title=f"{show.title} — {len(show.episodes)} episodes", header_style="bold")
     table.add_column("#", justify="right", style="magenta", no_wrap=True)
     table.add_column("Date", style="cyan", no_wrap=True)
@@ -234,19 +315,29 @@ def _interactive_select(show: core.Show) -> list[core.Episode]:
 def cmd_get(args) -> int:
     kind, s = core.classify(args.src)
     out = args.out
+    as_json = _want_json(args)
+
+    def _finish(show_meta: dict, n: int, records: list[dict]) -> int:
+        if as_json:
+            if n == 0:
+                return 1
+            _emit_json({"show": show_meta, "downloads": records})
+            return 0
+        return 0 if n else 1
 
     # --- pasted episode links: download immediately ----------------------- #
     if kind == "xyz_episode":
-        if args.quiet:
+        if _is_quiet(args):
             url, title = core.xyz_episode_to_audio(s)
         else:
             with ui.status("[cyan]Resolving xiaoyuzhou episode…"):
                 url, title = core.xyz_episode_to_audio(s)
-        return 0 if _download_all([core.Episode(title=title, pub="", url=url,
-                                                mime="audio/mp4")], out, args) else 1
+        n, records = _download_all(
+            [core.Episode(title=title, pub="", url=url, mime="audio/mp4")], out, args)
+        return _finish({"title": title or "", "feed": ""}, n, records)
 
     if kind == "apple_episode":
-        if args.quiet:
+        if _is_quiet(args):
             url, title, rel = core.apple_episode_to_audio(s)
         else:
             with ui.status("[cyan]Resolving Apple episode…"):
@@ -259,24 +350,31 @@ def cmd_get(args) -> int:
                 "%a, %d %b %Y %H:%M:%S +0000")
         except Exception:
             pub = ""
-        return 0 if _download_all([core.Episode(title=title or "episode", pub=pub,
-                                                url=url)], out, args) else 1
+        n, records = _download_all(
+            [core.Episode(title=title or "episode", pub=pub, url=url)], out, args)
+        return _finish({"title": title or "", "feed": ""}, n, records)
 
     # --- show / rss: select then download --------------------------------- #
     show = _resolve_show(kind, s, args)
     sel = core.select(show.episodes, match=args.match, latest=args.latest, index=args.index)
 
     if not sel and not (args.match or args.latest or args.index):
-        # no selector given -> interactive picker, or list+hint if not a TTY (quiet mode disables picker)
-        if not args.quiet and _interactive() and not args.no_input:
+        # no selector -> interactive picker, or hint if not interactive / --json / --quiet
+        if not _is_quiet(args) and _interactive() and not args.no_input:
             sel = _interactive_select(show)
             if not sel:
                 _err("nothing selected")
                 return 1
         else:
-            cmd_list(argparse.Namespace(src=s, match=None, all=False, limit=20, quiet=args.quiet))
-            _err("no selector and not an interactive terminal — pass "
-                 "--match RE / --latest N / --index 0,2")
+            if as_json:
+                _err("no selector — pass --match RE / --latest N / --index 0,2 "
+                     "(or use: podpull --json list <src>)")
+            else:
+                cmd_list(argparse.Namespace(
+                    src=s, match=None, all=False, limit=20,
+                    quiet=getattr(args, "quiet", False), json=False))
+                _err("no selector and not an interactive terminal — pass "
+                     "--match RE / --latest N / --index 0,2")
             return 1
 
     if not sel:
@@ -287,9 +385,10 @@ def cmd_get(args) -> int:
     target = out
     if len(sel) > 1:
         target = os.path.join(out, core.safe_filename(show.title))
-    if not args.quiet:
+    if not _is_quiet(args):
         ui.print(f"[bold]Downloading {len(sel)} episode(s)[/] from “{show.title}” → [dim]{target}[/]")
-    return 0 if _download_all(sel, target, args) else 1
+    n, records = _download_all(sel, target, args)
+    return _finish({"title": show.title, "feed": show.feed}, n, records)
 
 
 # --------------------------------------------------------------------------- #
@@ -367,6 +466,7 @@ EXAMPLES = """
 
 [dim]<src> = Apple show URL · bare Apple ID · RSS feed URL · Apple ?i= episode URL · xiaoyuzhou link[/]
 [dim]Downloads default to ~/Downloads/Podcasts (override with --out).[/]
+[dim]Scripting: podpull --json list <src> | jq …   (JSON on stdout; flag goes before the command)[/]
 
 [dim]Optional: set PODCASTINDEX_API_KEY + PODCASTINDEX_API_SECRET (free — podcastindex.org)[/]
 [dim]to enrich search results and add a feed-resolution fallback.[/]
@@ -380,6 +480,8 @@ def build_parser() -> argparse.ArgumentParser:
                     "RSS feeds, or xiaoyuzhou links.",
         epilog=EXAMPLES)
     p.add_argument("--version", action="version", version=f"podpull {__version__}")
+    p.add_argument("--json", action="store_true",
+                   help="emit one JSON document on stdout (no UI); place before the command")
     sub = p.add_subparsers(dest="cmd", metavar="<command>")
 
     s = sub.add_parser("search", help="search for podcast shows", formatter_class=_Formatter,
