@@ -27,6 +27,7 @@ podpull get   <src> --match RE | --latest N | --index 0,2[,..]   # download (ali
 podpull get   <episode-url>                  # download a pasted Apple ?i= or xiaoyuzhou link
 podpull get   <src> ... -q / --quiet         # suppress spinner/progress bar
 podpull --json <cmd> …                       # one JSON document on stdout (flag before command)
+podpull serve [--host] [--port]              # local UI: search / trending / browser download
 ```
 
 `<src>` = Apple show URL · bare Apple ID · RSS feed URL · Apple episode `?i=` URL · xiaoyuzhou episode URL.

@@ -3,6 +3,16 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
+## [0.8.0] — 2026-07-21
+
+### Added
+- **`podpull serve`** — local web UI (default `http://127.0.0.1:8787`): search shows,
+  browse trending (**中文** via [xyzrank](https://xyzrank.com/) · **International** via
+  Apple Top Podcasts), pick episodes, then download enclosure URLs **in the browser**
+  (blob-save when CORS allows, else new tab). Does not proxy audio. `--host` / `--port` /
+  `--no-open`.
+- Marketing landing: live Apple Top Podcasts strip (top 24) with CLI id hints.
+
 ## [0.7.0] — 2026-07-21
 
 ### Added

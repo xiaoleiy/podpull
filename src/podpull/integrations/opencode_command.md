@@ -15,6 +15,7 @@ Commands:
 - `podpull get <episode-url>` — download a pasted Apple `?i=` or xiaoyuzhou link.
 - `podpull get <src> ... -q/--quiet` — suppress spinner/progress bar output.
 - `podpull --json <cmd> …` — one JSON document on stdout (place `--json` before the command).
+- `podpull serve` — local UI (search / trending / browser enclosure download).
 
 Rules:
 - ALWAYS pass a selector (`--match` / `--latest` / `--index`) **and `--no-input`** — never run a bare

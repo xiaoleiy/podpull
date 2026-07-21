@@ -1,6 +1,6 @@
 # Design: `podpull serve` local web UI
 
-Date: 2026-07-21 · Target release: **v0.8.0** (tentative) · Status: **amended — search-first + browser download; awaiting re-approval**
+Date: 2026-07-21 · Target release: **v0.8.0** · Status: **approved & implemented**
 
 Backlog source: Obsidian `Projects/Podpull/调研 Investigation.md` → 调研 2
 (local web UI as GUI demand probe); Follow-ups sequencing **A `--json` → B serve → C BYOK**.

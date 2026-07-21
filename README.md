@@ -171,6 +171,18 @@ export PODCASTINDEX_API_SECRET=...
 
 Without these, podpull behaves exactly as before (iTunes only).
 
+### Local web UI
+
+```bash
+podpull serve                 # http://127.0.0.1:8787
+podpull serve --port 9000
+podpull serve --host 0.0.0.0  # LAN (prints a warning)
+```
+
+Search or browse trending (中文 / International), pick episodes, then download
+**in the browser** from the episode’s enclosure URL (no audio proxy through serve).
+For guaranteed saves into `~/Downloads/Podcasts`, keep using `podpull get`.
+
 ## Roadmap
 
 - **v0.1**: search · info · list · download (stdlib only).
@@ -182,8 +194,10 @@ Without these, podpull behaves exactly as before (iTunes only).
 - **v0.6**: robust feed parsing (RSS 2.0 / RSS 1.0 / Atom, dirty-XML recovery),
   verified against Chinese-market hosts, `ximalaya.com/album/<id>` links, optional
   Podcast Index (BYOK) search + feed-resolution fallback.
-- **v0.7** (current): `--json` output mode for scripting (`podpull --json list … | jq`).
-- **next**: optional local `podpull serve` web UI (demand probe); then BYOK summarization.
+- **v0.7**: `--json` output mode for scripting (`podpull --json list … | jq`).
+- **v0.8** (current): `podpull serve` local web UI (trending + browser enclosure download);
+  landing-page Apple charts teaser.
+- **next**: BYOK summarization (`podpull[ai]`).
 - **v1+ (`podpull[ai]`)**: opt-in **BYOK summarization** — local transcription
   (faster-whisper) + your own LLM key (Anthropic/OpenAI). Fully local, private,
   no subscription. Cleanly isolated from the core.
