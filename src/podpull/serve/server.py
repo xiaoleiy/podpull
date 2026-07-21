@@ -25,17 +25,6 @@ def _json_bytes(obj: Any, status: int = 200) -> tuple[int, bytes, str]:
     return status, body, "application/json; charset=utf-8"
 
 
-def _show_src(show_hint: dict) -> str:
-    """Pick a core.classify-able source from a trending / search card."""
-    if show_hint.get("feed"):
-        return show_hint["feed"]
-    if show_hint.get("apple_id"):
-        return str(show_hint["apple_id"])
-    if show_hint.get("page_url"):
-        return show_hint["page_url"]
-    raise ValueError("show has no feed, apple_id, or page_url")
-
-
 def _episode_dict(ep: core.Episode, index: int) -> dict:
     return {
         "index": index,
