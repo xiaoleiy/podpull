@@ -15,6 +15,7 @@ Commands:
 - `podpull get <src> --match RE | --latest N | --index 0,2` — download (alias: `pull`).
 - `podpull get <episode-url>` — a pasted Apple `?i=` or xiaoyuzhou link.
 - `podpull get <src> ... -q/--quiet` — suppress spinner/progress bar.
+- `podpull --json <cmd> …` — one JSON document on stdout (flag before the command).
 `<src>` = Apple show URL · bare Apple ID · RSS feed URL · Apple episode URL · xiaoyuzhou link.
 
 Rules:
@@ -22,6 +23,7 @@ Rules:
   that can't be driven from the agent.
 - Also pass `-q`/`--quiet` — the spinner/progress bar are pointless outside a live terminal; stdout
   output (the saved file path) is unaffected.
+- Prefer `podpull --json …` when you need structured data (`search`/`info`/`list`/`get`).
 - File path prints to stdout, progress to stderr. Default output `~/Downloads/Podcasts` (`--out` to change).
 - Multiple episodes → per-show folder; filenames are normalized to be cloud-storage-safe (CJK kept).
 - Optional: if PODCASTINDEX_API_KEY/PODCASTINDEX_API_SECRET are set, `search` also queries Podcast Index and feed resolution gains a fallback; ximalaya.com/album/<id> links work as a source.

@@ -3,6 +3,14 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
+## [0.7.0] — 2026-07-21
+
+### Added
+- Global `--json` flag (`podpull --json <command> …`): emits one JSON document on
+  stdout for `search` / `info` / `list` / `get`, with no rich UI. Failures stay
+  human messages on stderr + non-zero exit. Implies quiet for `get` (no picker /
+  progress). Place `--json` before the subcommand.
+
 ## [0.6.0] — 2026-07-08
 
 ### Added

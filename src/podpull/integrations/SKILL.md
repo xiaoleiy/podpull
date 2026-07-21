@@ -26,7 +26,7 @@ podpull list  <src> [--match RE] [--all]     # list episodes; index 0 = newest
 podpull get   <src> --match RE | --latest N | --index 0,2[,..]   # download (alias: `pull`)
 podpull get   <episode-url>                  # download a pasted Apple ?i= or xiaoyuzhou link
 podpull get   <src> ... -q / --quiet         # suppress spinner/progress bar
-
+podpull --json <cmd> …                       # one JSON document on stdout (flag before command)
 ```
 
 `<src>` = Apple show URL · bare Apple ID · RSS feed URL · Apple episode `?i=` URL · xiaoyuzhou episode URL.
@@ -45,6 +45,9 @@ podpull get   <src> ... -q / --quiet         # suppress spinner/progress bar
 - **Add `-q`/`--quiet`** to suppress the spinner and live progress bar on stderr — recommended for
   agent transcripts, since neither renders meaningfully outside a live terminal. Saved file paths still
   print to stdout either way.
+- Prefer **`podpull --json …`** when you need structured data (`search` / `info` / `list` / `get`).
+  The flag goes **before** the command. On success stdout is one JSON document; on failure check the
+  exit code (human error on stderr, no JSON).
 - Downloads default to `~/Downloads/Podcasts`; pass `--out DIR` to change.
 - Selecting **multiple** episodes creates a per-show sub-folder. Filenames are normalized to be
   cloud-storage-safe (emoji/illegal characters removed; CJK kept).
@@ -54,7 +57,9 @@ podpull get   <src> ... -q / --quiet         # suppress spinner/progress bar
 
 ```
 podpull search "睡前故事"
+podpull --json list 1532755821 --limit 5
 podpull get 1532755821 --latest 1 --no-input --quiet
+podpull --json get 1532755821 --latest 1 --no-input
 podpull get 1532755821 --match "牛頭人" --no-input --out ~/Audio
 podpull get "https://www.xiaoyuzhoufm.com/episode/<id>" --no-input
 ```

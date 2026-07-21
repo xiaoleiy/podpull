@@ -138,6 +138,17 @@ Downloads default to `~/Downloads/Podcasts` (override with `--out`). The saved f
 path is printed to **stdout** (so you can pipe/capture it); progress and messages go
 to **stderr**. Use `--no-input` to never open the picker (fail instead) for scripts.
 
+### JSON (scripting)
+
+```bash
+podpull --json search "睡前故事"
+podpull --json list 1532755821 --limit 5 | jq '.episodes[0].title'
+podpull --json get 1532755821 --latest 1 --no-input | jq -r '.downloads[].path'
+```
+
+`--json` goes **before** the command. On success, stdout is one JSON document (no
+tables/progress); on failure, a human message on stderr and a non-zero exit.
+
 **Filenames** are normalized for cloud storage — emoji and other symbols are dropped,
 full-width/illegal characters folded or stripped — so files upload cleanly to Google
 Drive, OneDrive, Dropbox, iCloud, etc. (CJK and ordinary text are kept). When you grab
@@ -168,10 +179,11 @@ Without these, podpull behaves exactly as before (iTunes only).
 - **v0.3**: renamed `podget` → `podpull`.
 - **v0.4**: cloud-safe filename normalization; multi-episode downloads grouped into a per-show folder.
 - **v0.5**: `pull` alias for `get`; `podpull skills install` sets up integrations for Claude Code, Codex, OpenCode, and Cursor.
-- **v0.6** (current): robust feed parsing (RSS 2.0 / RSS 1.0 / Atom, dirty-XML recovery),
+- **v0.6**: robust feed parsing (RSS 2.0 / RSS 1.0 / Atom, dirty-XML recovery),
   verified against Chinese-market hosts, `ximalaya.com/album/<id>` links, optional
   Podcast Index (BYOK) search + feed-resolution fallback.
-- **next**: `--json` output mode for scripting.
+- **v0.7** (current): `--json` output mode for scripting (`podpull --json list … | jq`).
+- **next**: optional local `podpull serve` web UI (demand probe); then BYOK summarization.
 - **v1+ (`podpull[ai]`)**: opt-in **BYOK summarization** — local transcription
   (faster-whisper) + your own LLM key (Anthropic/OpenAI). Fully local, private,
   no subscription. Cleanly isolated from the core.
