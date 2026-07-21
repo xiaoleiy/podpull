@@ -25,6 +25,7 @@ src/podpull/
   core.py            # resolve/parse/search/select/download — PURE STDLIB, no third-party imports
   cli.py             # argparse commands + ALL UI (rich, questionary, rich-argparse)
   skills.py          # `podpull skills` — installs agent integrations
+  serve/             # `podpull serve` — stdlib HTTP metadata API + static UI
   integrations/      # bundled skill/command/rule files (packaged as wheel data)
 tests/               # test_core.py, test_cli.py, test_skills.py  (pytest, no network)
 docs/                # index.html (Aurora landing page), icon.svg, demo.tape/demo.gif
