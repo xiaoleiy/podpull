@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>podpull — the episode grabber</title>
-<meta name="description" content="Download any podcast episode straight to your shell — Apple Podcasts, an RSS feed, or a xiaoyuzhou (小宇宙) link. Interactive picker, live progress, resumable.">
-<meta property="og:title" content="podpull — the episode grabber">
-<meta property="og:description" content="Download any podcast episode straight to your shell. Apple · RSS · 小宇宙. Interactive picker, live progress.">
+<title>podpull — find episodes, download to disk</title>
+<meta name="description" content="Find episodes from any show. Download straight to disk — Apple Podcasts, RSS, or 小宇宙. Search, pick, save to ~/Downloads/Podcasts. No accounts, no queues.">
+<meta property="og:title" content="podpull — find episodes, download to disk">
+<meta property="og:description" content="Find episodes from any show. Download straight to disk. Search, pick, save to ~/Downloads/Podcasts. No accounts, no queues.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://xiaoleiy.github.io/podpull/icon-256.png">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -34,10 +34,14 @@ a{color:inherit}
 .wrap{max-width:var(--max); margin:0 auto; padding:0 26px; position:relative; z-index:1}
 .mono{font-family:"JetBrains Mono",monospace}
 
-nav{display:flex; justify-content:space-between; align-items:center; padding:20px 0; font-weight:700}
+nav{display:flex; justify-content:space-between; align-items:center; padding:20px 0; font-weight:700; gap:16px}
 nav .brand{font-family:"Sora";font-weight:800; letter-spacing:-.02em}
 nav .brand i{color:var(--mint);font-style:normal}
+nav .nav-right{display:flex; align-items:center; gap:14px}
 nav a{color:var(--txt-dim); text-decoration:none; font-size:14px} nav a:hover{color:var(--txt)}
+.lang{display:inline-flex; gap:4px; border:1px solid var(--line); border-radius:999px; padding:3px; background:var(--card)}
+.lang button{font-family:"JetBrains Mono",monospace; font-size:11px; padding:6px 10px; border:0; border-radius:999px; background:transparent; color:var(--txt-dim); cursor:pointer}
+.lang button.active{background:var(--mint); color:#04150e; font-weight:600}
 
 .hero{padding:54px 0 30px; display:grid; grid-template-columns:1.05fr .95fr; gap:40px; align-items:center}
 .pill{display:inline-block; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--mint);
@@ -45,7 +49,7 @@ nav a{color:var(--txt-dim); text-decoration:none; font-size:14px} nav a:hover{co
 h1{font-family:"Sora",sans-serif; font-weight:800; font-size:clamp(40px,6.4vw,72px); line-height:1.02;
   letter-spacing:-.03em; margin-bottom:18px}
 h1 .grad{background:linear-gradient(100deg,var(--mint),var(--cyan)); -webkit-background-clip:text; background-clip:text; color:transparent}
-.lead{color:var(--txt-dim); font-size:19px; max-width:30ch; margin-bottom:26px}
+.lead{color:var(--txt-dim); font-size:19px; max-width:42ch; margin-bottom:26px}
 .cta{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
 .btn{font-family:"JetBrains Mono",monospace; font-size:13.5px; padding:13px 18px; border-radius:12px; cursor:pointer; border:0; display:inline-flex; gap:8px; align-items:center}
 .btn.primary{background:linear-gradient(100deg,var(--mint),var(--cyan)); color:#04150e; font-weight:600; box-shadow:0 8px 30px rgba(53,224,161,.25)}
@@ -94,16 +98,25 @@ footer a{color:var(--mint);text-decoration:none}
 <div class="aurora"><b></b><b></b><b></b></div>
 
 <div class="wrap">
-<nav><div class="brand"><i>▸</i> podpull</div><a href="https://github.com/xiaoleiy/podpull">GitHub ↗</a></nav>
+<nav>
+  <div class="brand"><i>▸</i> podpull</div>
+  <div class="nav-right">
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" class="active">EN</button>
+      <button type="button" data-lang="zh">中文</button>
+    </div>
+    <a href="https://github.com/xiaoleiy/podpull">GitHub ↗</a>
+  </div>
+</nav>
 
 <header class="hero">
   <div>
     <span class="pill">Apple · RSS · 小宇宙</span>
-    <h1>Grab any podcast episode, <span class="grad">straight to your shell.</span></h1>
-    <p class="lead">podpull turns a show link into a clean audio file on your disk — pick episodes from an interactive list, watch them download. No app, no login, no DRM.</p>
+    <h1><span data-i18n="heroTitle">Find episodes from any show.</span> <span class="grad" data-i18n="heroAccent">Download straight to disk.</span></h1>
+    <p class="lead" data-i18n="heroLead">Search a show, pick episodes, save to ~/Downloads/Podcasts. No accounts, no queues.</p>
     <div class="cta">
       <button class="btn primary copy" data-c="brew install xiaoleiy/tap/podpull">⌘ brew install xiaoleiy/tap/podpull</button>
-      <a class="btn ghost" href="https://github.com/xiaoleiy/podpull">Docs</a>
+      <a class="btn ghost" href="https://github.com/xiaoleiy/podpull" data-i18n="docs">Docs</a>
     </div>
   </div>
   <div class="glass">
@@ -114,16 +127,16 @@ footer a{color:var(--mint);text-decoration:none}
 </div>
 
 <div class="wrap"><section style="padding-top:28px">
-  <div class="kick">// trending on Apple Podcasts</div>
-  <h2>What’s hot right now</h2>
-  <p style="color:var(--txt-dim);margin:-8px 0 18px;max-width:52ch">Live Top Podcasts (US). Click through to Apple, or grab the id for the CLI. For 中文榜 + in-browser episode download, run <code class="mono" style="color:var(--mint)">podpull serve</code>.</p>
+  <div class="kick" data-i18n="trendKick">// trending on Apple Podcasts</div>
+  <h2 data-i18n="trendTitle">What’s hot right now</h2>
+  <p style="color:var(--txt-dim);margin:-8px 0 18px;max-width:52ch" data-i18n-html="trendLead">Live Top Podcasts (US). Click through to Apple, or grab the id for the CLI. For 中文榜 + in-browser episode download, run <code class="mono" style="color:var(--mint)">podpull serve</code>.</p>
   <div class="trend-grid" id="trend"></div>
   <p id="trend-msg" style="color:var(--txt-dim);font-size:14px;margin-top:12px"></p>
 </section></div>
 
 <div class="wrap"><section style="padding-top:20px">
-  <div class="kick">// the pipeline</div>
-  <h2>No magic — just the feeds publishers hand out</h2>
+  <div class="kick" data-i18n="pipeKick">// the pipeline</div>
+  <h2 data-i18n="pipeTitle">No magic — just the feeds publishers hand out</h2>
   <div class="glass mono" style="padding:20px 22px;font-size:13.5px;line-height:2;overflow-x:auto;color:var(--txt-dim)">
 Apple show / id  ──<span style="color:var(--mint)">iTunes Lookup</span>──▶  RSS feed url
 RSS feed         ──<span style="color:var(--mint)">&lt;enclosure&gt;</span>───▶  <span style="color:#dfe7f2">direct .mp3 / .m4a</span>
@@ -132,42 +145,144 @@ RSS feed         ──<span style="color:var(--mint)">&lt;enclosure&gt;</span>�
 </section></div>
 
 <div class="wrap"><section>
-  <div class="kick">// three moves</div>
-  <h2>Search → pick → download</h2>
+  <div class="kick" data-i18n="movesKick">// three moves</div>
+  <h2 data-i18n="movesTitle">Search → pick → download</h2>
   <div class="grid3">
-    <div class="card glass"><div class="n">01</div><h3>Search</h3><p>Find any show by name across iTunes' open catalog.</p><code><span class="p">$</span> podpull search <b>"睡前故事"</b></code></div>
-    <div class="card glass"><div class="n">02</div><h3>Pick</h3><p>Hand it a show, choose one or many from a keyboard checklist.</p><code><span class="p">$</span> podpull get <b>1532755821</b></code></div>
-    <div class="card glass"><div class="n">03</div><h3>Download</h3><p>Resumable, live progress, tidy filenames.</p><code><span class="p">$</span> podpull get <b>--latest 3</b></code></div>
+    <div class="card glass"><div class="n">01</div><h3 data-i18n="m1t">Search</h3><p data-i18n="m1p">Find any show by name across iTunes' open catalog.</p><code><span class="p">$</span> podpull search <b>"睡前故事"</b></code></div>
+    <div class="card glass"><div class="n">02</div><h3 data-i18n="m2t">Pick</h3><p data-i18n="m2p">Hand it a show, choose one or many from a keyboard checklist.</p><code><span class="p">$</span> podpull get <b>1532755821</b></code></div>
+    <div class="card glass"><div class="n">03</div><h3 data-i18n="m3t">Download</h3><p data-i18n="m3p">Resumable, live progress, tidy filenames — straight to disk.</p><code><span class="p">$</span> podpull get <b>--latest 3</b></code></div>
   </div>
 </section></div>
 
 <div class="wrap"><section>
-  <div class="kick">// in the box</div>
-  <h2>Small tool, sharp edges</h2>
+  <div class="kick" data-i18n="boxKick">// in the box</div>
+  <h2 data-i18n="boxTitle">Small tool, sharp edges</h2>
   <div class="feats">
-    <div class="feat glass"><div class="ic">⌨</div><h4>Interactive picker</h4><p>Arrow-key, multi-select checklist.</p></div>
-    <div class="feat glass"><div class="ic">▰</div><h4>Live progress</h4><p>Size · speed · ETA bars.</p></div>
-    <div class="feat glass"><div class="ic">⇄</div><h4>Apple · RSS · 小宇宙</h4><p>Shows, feeds, or a pasted link.</p></div>
-    <div class="feat glass"><div class="ic">↻</div><h4>Resumable</h4><p>Range requests resume drops.</p></div>
-    <div class="feat glass"><div class="ic">›_</div><h4>Scriptable</h4><p>File path on stdout, UI on stderr. <code class="mono">--json</code> too.</p></div>
-    <div class="feat glass"><div class="ic">◎</div><h4>Local web UI</h4><p><code class="mono">podpull serve</code> — search, trending, browser download.</p></div>
-    <div class="feat glass"><div class="ic">✦</div><h4>BYOK summaries<span class="soon">soon</span></h4><p>Local transcription + your LLM key.</p></div>
+    <div class="feat glass"><div class="ic">⌨</div><h4 data-i18n="f1t">Interactive picker</h4><p data-i18n="f1p">Arrow-key, multi-select checklist.</p></div>
+    <div class="feat glass"><div class="ic">▰</div><h4 data-i18n="f2t">Live progress</h4><p data-i18n="f2p">Size · speed · ETA bars.</p></div>
+    <div class="feat glass"><div class="ic">⇄</div><h4 data-i18n="f3t">Apple · RSS · 小宇宙</h4><p data-i18n="f3p">Shows, feeds, or a pasted link.</p></div>
+    <div class="feat glass"><div class="ic">↻</div><h4 data-i18n="f4t">Resumable</h4><p data-i18n="f4p">Range requests resume drops.</p></div>
+    <div class="feat glass"><div class="ic">›_</div><h4 data-i18n="f5t">Scriptable</h4><p data-i18n-html="f5p">File path on stdout, UI on stderr. <code class="mono">--json</code> too.</p></div>
+    <div class="feat glass"><div class="ic">◎</div><h4 data-i18n="f6t">Local web UI</h4><p data-i18n-html="f6p"><code class="mono">podpull serve</code> — search, trending, browser download.</p></div>
+    <div class="feat glass"><div class="ic">✦</div><h4 data-i18n-html="f7t">BYOK summaries<span class="soon">soon</span></h4><p data-i18n="f7p">Local transcription + your LLM key.</p></div>
   </div>
 </section></div>
 
 <div class="wrap"><section>
-  <div class="kick">// get it</div>
-  <h2>One line. macOS · Linux.</h2>
+  <div class="kick" data-i18n="getKick">// get it</div>
+  <h2 data-i18n="getTitle">One line. macOS · Linux.</h2>
   <div class="installrow">
-    <div class="cmd glass"><code><span class="p">$</span> brew install xiaoleiy/tap/podpull</code><button class="copy" data-c="brew install xiaoleiy/tap/podpull">Copy</button></div>
-    <div class="cmd glass"><code><span class="p">$</span> pipx install git+https://github.com/xiaoleiy/podpull</code><button class="copy" data-c="pipx install git+https://github.com/xiaoleiy/podpull">Copy</button></div>
+    <div class="cmd glass"><code><span class="p">$</span> brew install xiaoleiy/tap/podpull</code><button class="copy" data-c="brew install xiaoleiy/tap/podpull" data-i18n="copy">Copy</button></div>
+    <div class="cmd glass"><code><span class="p">$</span> pipx install git+https://github.com/xiaoleiy/podpull</code><button class="copy" data-c="pipx install git+https://github.com/xiaoleiy/podpull" data-i18n="copy">Copy</button></div>
   </div>
 </section></div>
 
-<div class="wrap"><footer><span>MIT © 2026 · built by <a href="https://github.com/xiaoleiy">xiaoleiy</a></span><span><a href="https://github.com/xiaoleiy/podpull">Source ↗</a> · <a href="https://github.com/xiaoleiy/podpull/issues">Issues ↗</a></span></footer></div>
+<div class="wrap"><footer><span data-i18n-html="footLeft">MIT © 2026 · built by <a href="https://github.com/xiaoleiy">xiaoleiy</a></span><span data-i18n-html="footRight"><a href="https://github.com/xiaoleiy/podpull">Source ↗</a> · <a href="https://github.com/xiaoleiy/podpull/issues">Issues ↗</a></span></footer></div>
 
 <script>
-document.querySelectorAll(".copy").forEach(function(b){b.addEventListener("click",function(){navigator.clipboard.writeText(b.dataset.c).then(function(){var t=b.textContent;b.textContent="Copied ✓";setTimeout(function(){b.textContent=t},1300)})})});
+(function(){
+  var I18N = {
+    en: {
+      heroTitle: "Find episodes from any show.",
+      heroAccent: "Download straight to disk.",
+      heroLead: "Search a show, pick episodes, save to ~/Downloads/Podcasts. No accounts, no queues.",
+      docs: "Docs",
+      trendKick: "// trending on Apple Podcasts",
+      trendTitle: "What’s hot right now",
+      trendLead: 'Live Top Podcasts (US). Click through to Apple, or grab the id for the CLI. For 中文榜 + in-browser episode download, run <code class="mono" style="color:var(--mint)">podpull serve</code>.',
+      pipeKick: "// the pipeline",
+      pipeTitle: "No magic — just the feeds publishers hand out",
+      movesKick: "// three moves",
+      movesTitle: "Search → pick → download",
+      m1t: "Search", m1p: "Find any show by name across iTunes' open catalog.",
+      m2t: "Pick", m2p: "Hand it a show, choose one or many from a keyboard checklist.",
+      m3t: "Download", m3p: "Resumable, live progress, tidy filenames — straight to disk.",
+      boxKick: "// in the box",
+      boxTitle: "Small tool, sharp edges",
+      f1t: "Interactive picker", f1p: "Arrow-key, multi-select checklist.",
+      f2t: "Live progress", f2p: "Size · speed · ETA bars.",
+      f3t: "Apple · RSS · 小宇宙", f3p: "Shows, feeds, or a pasted link.",
+      f4t: "Resumable", f4p: "Range requests resume drops.",
+      f5t: "Scriptable", f5p: 'File path on stdout, UI on stderr. <code class="mono">--json</code> too.',
+      f6t: "Local web UI", f6p: '<code class="mono">podpull serve</code> — search, trending, browser download.',
+      f7t: 'BYOK summaries<span class="soon">soon</span>', f7p: "Local transcription + your LLM key.",
+      getKick: "// get it",
+      getTitle: "One line. macOS · Linux.",
+      copy: "Copy",
+      copied: "Copied ✓",
+      chartsFail: "Charts unavailable right now.",
+      footLeft: 'MIT © 2026 · built by <a href="https://github.com/xiaoleiy">xiaoleiy</a>',
+      footRight: '<a href="https://github.com/xiaoleiy/podpull">Source ↗</a> · <a href="https://github.com/xiaoleiy/podpull/issues">Issues ↗</a>'
+    },
+    zh: {
+      heroTitle: "搜任意节目。",
+      heroAccent: "下载音频到本地。",
+      heroLead: "搜索节目、勾选单集，保存到 ~/Downloads/Podcasts。无需账号，无需排队。",
+      docs: "文档",
+      trendKick: "// Apple Podcasts 热门",
+      trendTitle: "正在热播",
+      trendLead: '实时美国 Top Podcasts。点封面去 Apple，或复制 id 给 CLI。中文榜 + 浏览器下载请运行 <code class="mono" style="color:var(--mint)">podpull serve</code>。',
+      pipeKick: "// 链路",
+      pipeTitle: "没有黑魔法 — 就是发布者公开的 feed",
+      movesKick: "// 三步",
+      movesTitle: "搜索 → 勾选 → 下载",
+      m1t: "搜索", m1p: "按名称在 iTunes 开放目录里找节目。",
+      m2t: "勾选", m2p: "给一个节目，用键盘清单选一集或多集。",
+      m3t: "下载", m3p: "可断点续传、实时进度、干净文件名 — 直接落盘。",
+      boxKick: "// 能力",
+      boxTitle: "小工具，锋利一点",
+      f1t: "交互选择", f1p: "方向键、多选清单。",
+      f2t: "实时进度", f2p: "大小 · 速度 · ETA。",
+      f3t: "Apple · RSS · 小宇宙", f3p: "节目、feed，或粘贴链接。",
+      f4t: "可续传", f4p: "Range 请求续上中断。",
+      f5t: "可脚本化", f5p: '路径打 stdout，界面打 stderr。也有 <code class="mono">--json</code>。',
+      f6t: "本地网页", f6p: '<code class="mono">podpull serve</code> — 搜索、热门、浏览器下载。',
+      f7t: 'BYOK 摘要<span class="soon">soon</span>', f7p: "本地转写 + 你自己的 LLM key。",
+      getKick: "// 安装",
+      getTitle: "一行命令。macOS · Linux。",
+      copy: "复制",
+      copied: "已复制 ✓",
+      chartsFail: "暂时无法加载榜单。",
+      footLeft: 'MIT © 2026 · built by <a href="https://github.com/xiaoleiy">xiaoleiy</a>',
+      footRight: '<a href="https://github.com/xiaoleiy/podpull">Source ↗</a> · <a href="https://github.com/xiaoleiy/podpull/issues">Issues ↗</a>'
+    }
+  };
+  var lang = localStorage.getItem("podpull-lang") || "en";
+  function dict(){ return I18N[lang] || I18N.en; }
+  function applyI18n(){
+    var d = dict();
+    document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+    document.querySelectorAll("[data-i18n]").forEach(function(el){
+      var v = d[el.getAttribute("data-i18n")];
+      if (typeof v === "string") el.textContent = v;
+    });
+    document.querySelectorAll("[data-i18n-html]").forEach(function(el){
+      var v = d[el.getAttribute("data-i18n-html")];
+      if (typeof v === "string") el.innerHTML = v;
+    });
+    document.querySelectorAll(".lang button").forEach(function(b){
+      b.classList.toggle("active", b.getAttribute("data-lang") === lang);
+    });
+  }
+  document.querySelectorAll(".lang button").forEach(function(b){
+    b.addEventListener("click", function(){
+      lang = b.getAttribute("data-lang");
+      localStorage.setItem("podpull-lang", lang);
+      applyI18n();
+    });
+  });
+  applyI18n();
+
+  document.querySelectorAll(".copy").forEach(function(b){
+    b.addEventListener("click", function(){
+      navigator.clipboard.writeText(b.dataset.c).then(function(){
+        var t = b.textContent;
+        b.textContent = dict().copied;
+        setTimeout(function(){ b.textContent = dict().copy; }, 1300);
+      });
+    });
+  });
+})();
 (function(){
   var el=document.getElementById("trend"), msg=document.getElementById("trend-msg");
   if(!el) return;
@@ -193,7 +308,12 @@ document.querySelectorAll(".copy").forEach(function(b){b.addEventListener("click
         el.appendChild(a);
       });
     })
-    .catch(function(){ if(msg) msg.textContent="Charts unavailable right now."; });
+    .catch(function(){
+      if(msg){
+        var lang = localStorage.getItem("podpull-lang") || "en";
+        msg.textContent = lang === "zh" ? "暂时无法加载榜单。" : "Charts unavailable right now.";
+      }
+    });
 })();
 (function(){
   var tb=document.getElementById("tb"); if(!tb)return;

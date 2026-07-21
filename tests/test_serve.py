@@ -41,12 +41,15 @@ def test_api_list(monkeypatch):
 def test_api_search(monkeypatch):
     monkeypatch.setattr(core, "search_shows", lambda term, limit, country: [
         {"collectionId": 9, "collectionName": "S", "artistName": "a",
-         "feedUrl": "https://f", "trackCount": 3}])
+         "feedUrl": "https://f", "trackCount": 3,
+         "artworkUrl600": "https://img/a.jpg"}])
     status, body, _ = server.handle_api(
         "GET", "/api/search", {"q": ["hello"]}, b"")
     assert status == 200
     data = json.loads(body)
     assert data["results"][0]["apple_id"] == "9"
+    assert data["results"][0]["artwork"] == "https://img/a.jpg"
+    assert data["results"][0]["feed_url"] == "https://f"
 
 
 def test_api_trending(monkeypatch):

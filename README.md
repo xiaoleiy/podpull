@@ -179,7 +179,7 @@ podpull serve --port 9000
 podpull serve --host 0.0.0.0  # LAN (prints a warning)
 ```
 
-Search or browse trending (中文 / International), pick episodes, then download
+Search or browse trending (中文 / International), then **Download** one episode at a time
 **in the browser** from the episode’s enclosure URL (no audio proxy through serve).
 For guaranteed saves into `~/Downloads/Podcasts`, keep using `podpull get`.
 
@@ -195,8 +195,8 @@ For guaranteed saves into `~/Downloads/Podcasts`, keep using `podpull get`.
   verified against Chinese-market hosts, `ximalaya.com/album/<id>` links, optional
   Podcast Index (BYOK) search + feed-resolution fallback.
 - **v0.7**: `--json` output mode for scripting (`podpull --json list … | jq`).
-- **v0.8** (current): `podpull serve` local web UI (trending + browser enclosure download);
-  landing-page Apple charts teaser.
+- **v0.8** (current): `podpull serve` local web UI (trending + per-episode browser download,
+  EN/中文); landing-page Apple charts teaser.
 - **next**: BYOK summarization (`podpull[ai]`).
 - **v1+ (`podpull[ai]`)**: opt-in **BYOK summarization** — local transcription
   (faster-whisper) + your own LLM key (Anthropic/OpenAI). Fully local, private,

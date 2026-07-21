@@ -136,6 +136,8 @@ def handle_api(method: str, path: str, query: dict[str, list[str]],
                     "author": r.get("artistName") or "",
                     "episode_count": ep_count,
                     "feed_url": r.get("feedUrl") or "",
+                    "artwork": (r.get("artworkUrl600") or r.get("artworkUrl100")
+                                or r.get("artworkUrl60") or ""),
                 })
             return _json_bytes({"query": term, "results": rows})
 
@@ -231,7 +233,11 @@ class ServeHandler(BaseHTTPRequestHandler):
             return
         data = target.read_bytes()
         ctype = mimetypes.guess_type(str(target))[0] or "application/octet-stream"
-        if ctype.startswith("text/") or ctype in ("application/javascript", "application/json"):
+        if target.suffix.lower() == ".svg":
+            ctype = "image/svg+xml"
+        if ctype.startswith("text/") or ctype in (
+            "application/javascript", "application/json", "image/svg+xml",
+        ):
             ctype = f"{ctype}; charset=utf-8"
         self._send(200, data, ctype)
 

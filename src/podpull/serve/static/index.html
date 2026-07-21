@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>podpull serve</title>
+<link rel="icon" type="image/svg+xml" href="/icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -31,14 +34,22 @@ body {
   66% { transform: translate(-3%,3%) scale(.95); }
 }
 .wrap { max-width: 1080px; margin: 0 auto; padding: 0 22px; position: relative; z-index: 1; }
-.brand { font-family: Sora, sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -.02em; padding: 22px 0 8px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; padding: 22px 0 8px; gap: 12px; }
+.brand { font-family: Sora, sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -.02em; }
 .brand i { color: var(--mint); font-style: normal; }
-.hero { padding: 36px 0 28px; }
+.brand .sub { color: var(--dim); font-weight: 500; font-size: 13px; margin-left: 8px; }
+.lang { display: inline-flex; gap: 4px; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--card); }
+.lang button {
+  font-family: "JetBrains Mono", monospace; font-size: 11px; padding: 6px 10px;
+  border: 0; border-radius: 999px; background: transparent; color: var(--dim); cursor: pointer;
+}
+.lang button.active { background: var(--mint); color: #04150e; font-weight: 600; }
+.hero { padding: 36px 0 20px; }
 .hero h1 { font-family: Sora, sans-serif; font-weight: 800; font-size: clamp(28px, 5vw, 44px);
-  letter-spacing: -.03em; line-height: 1.1; margin-bottom: 12px; max-width: 18ch; }
+  letter-spacing: -.03em; line-height: 1.1; margin-bottom: 12px; max-width: 20ch; }
 .hero h1 .g { background: linear-gradient(100deg, var(--mint), var(--cyan));
   -webkit-background-clip: text; background-clip: text; color: transparent; }
-.hero p { color: var(--dim); max-width: 42ch; margin-bottom: 22px; }
+.hero p { color: var(--dim); max-width: 46ch; margin-bottom: 22px; }
 .search { display: flex; gap: 10px; flex-wrap: wrap; }
 .search input {
   flex: 1 1 240px; min-width: 0; padding: 14px 16px; border-radius: 12px;
@@ -66,22 +77,38 @@ h2 { font-family: Sora, sans-serif; font-size: 22px; margin-bottom: 14px; }
 }
 .tab.active { color: #04150e; background: var(--mint); border-color: transparent; font-weight: 600; }
 .grid {
-  display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px;
+  align-items: stretch;
 }
-@media (max-width: 900px) { .grid { grid-template-columns: repeat(4, 1fr); } }
-@media (max-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } .search { flex-direction: column; } }
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .search { flex-direction: column; } }
 .card {
+  display: flex; flex-direction: column; width: 100%; height: 100%; min-width: 0;
   background: var(--card); border: 1px solid var(--line); border-radius: 14px;
   padding: 10px; cursor: pointer; text-align: left; color: inherit; font: inherit;
-  transition: transform .15s, border-color .15s;
+  transition: transform .15s, border-color .15s; overflow: hidden;
 }
 .card:hover { transform: translateY(-2px); border-color: rgba(53,224,161,.35); }
-.card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; background: #111; display: block; }
-.card .rk { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--mint); margin: 8px 0 2px; }
-.card .tt { font-family: Sora, sans-serif; font-size: 13px; font-weight: 600; line-height: 1.25;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.card .au { font-size: 12px; color: var(--dim); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card img, .card .ph {
+  width: 100%; aspect-ratio: 1 / 1; height: auto; object-fit: cover; border-radius: 10px;
+  background: #151821; display: block; flex: 0 0 auto;
+}
+.card .rk {
+  font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--mint);
+  margin: 8px 0 2px; line-height: 1.2; flex: 0 0 auto;
+}
+.card .tt {
+  font-family: Sora, sans-serif; font-size: 13px; font-weight: 600; line-height: 1.25;
+  height: calc(1.25em * 2); /* always reserve 2 lines so cards match */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  flex: 0 0 auto;
+}
+.card .au {
+  font-size: 12px; color: var(--dim); margin-top: 4px; line-height: 1.3; height: 1.3em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 0 auto;
+}
 .attr { font-size: 12px; color: var(--dim); margin-top: 12px; }
+.attr a { color: var(--mint); }
 .panel {
   background: var(--card); border: 1px solid var(--line); border-radius: 16px;
   padding: 16px; backdrop-filter: blur(12px); margin-top: 8px;
@@ -90,11 +117,13 @@ h2 { font-family: Sora, sans-serif; font-size: 22px; margin-bottom: 14px; }
 .ep-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
 .ep-list { list-style: none; max-height: 420px; overflow: auto; }
 .ep-list li {
-  display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center;
-  padding: 10px 4px; border-bottom: 1px solid var(--line); font-size: 14px;
+  display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;
+  padding: 12px 4px; border-bottom: 1px solid var(--line); font-size: 14px;
 }
-.ep-list .meta { color: var(--dim); font-family: "JetBrains Mono", monospace; font-size: 11px; }
-.ep-list a { color: var(--cyan); font-size: 12px; text-decoration: none; }
+.ep-list .meta { color: var(--dim); font-family: "JetBrains Mono", monospace; font-size: 11px; margin-top: 2px; }
+.ep-list .ep-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.ep-list .btn { padding: 8px 12px; font-size: 12px; }
+.ep-list a.btn { text-decoration: none; display: inline-flex; align-items: center; }
 .status { margin-top: 10px; font-size: 14px; }
 .status .ok { color: var(--mint); }
 .status .err { color: var(--bad); }
@@ -106,51 +135,56 @@ details.advanced {
 details.advanced summary { cursor: pointer; font-family: Sora, sans-serif; color: var(--txt); }
 .hidden { display: none !important; }
 .msg { color: var(--dim); font-size: 14px; padding: 12px 0; }
+.search-status { min-height: 1.4em; margin-top: 10px; }
 </style>
 </head>
 <body>
 <div class="aurora"><b></b><b></b><b></b></div>
 <div class="wrap">
-  <div class="brand">pod<i>pull</i> <span style="color:var(--dim);font-weight:500;font-size:13px;margin-left:8px">serve · localhost</span></div>
+  <div class="topbar">
+    <div class="brand">pod<i>pull</i> <span class="sub" data-i18n="brandSub">serve · localhost</span></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" class="active">EN</button>
+      <button type="button" data-lang="zh">中文</button>
+    </div>
+  </div>
 
   <header class="hero">
-    <h1>Find episodes from any show. <span class="g">Download in your browser.</span></h1>
-    <p>Search or pick a trending show, select episodes, then save via the audio host — podpull never proxies the file.</p>
+    <h1><span data-i18n="heroTitle">Find episodes from any show.</span> <span class="g" data-i18n="heroAccent">Download in your browser.</span></h1>
+    <p data-i18n="heroLead">Search or pick a trending show, then download one episode at a time from the audio host. No accounts, no queues — podpull never proxies the file.</p>
     <form class="search" id="search-form">
-      <input id="q" type="search" placeholder="Search shows (e.g. 睡前故事, The Daily)" autocomplete="off" required>
-      <button class="btn primary" type="submit">Search</button>
+      <input id="q" type="search" data-i18n-placeholder="searchPh" placeholder="Search shows (e.g. 睡前故事, The Daily)" autocomplete="off" required>
+      <button class="btn primary" type="submit" data-i18n="searchBtn">Search</button>
     </form>
+    <p class="msg search-status" id="search-status"></p>
   </header>
 
-  <section>
-    <div class="kick">// trending</div>
-    <h2>Trending shows</h2>
-    <div class="tabs">
-      <button type="button" class="tab active" data-source="xyzrank">中文</button>
-      <button type="button" class="tab" data-source="apple">International</button>
-      <button type="button" class="btn ghost" id="load-more" style="margin-left:auto">Load more</button>
-    </div>
-    <div class="grid" id="trend-grid"></div>
-    <p class="attr">中文数据来自 <a href="https://xyzrank.com/" style="color:var(--mint)">xyzrank.com</a> · International from Apple Podcasts</p>
-    <p class="msg hidden" id="trend-msg"></p>
-  </section>
-
   <section id="results-sec" class="hidden">
-    <div class="kick">// search results</div>
-    <h2>Search results</h2>
+    <div class="kick" data-i18n="resultsKick">// search results</div>
+    <h2 id="results-title" data-i18n="resultsTitle">Search results</h2>
     <div class="grid" id="search-grid"></div>
   </section>
 
+  <section>
+    <div class="kick" data-i18n="trendKick">// trending</div>
+    <h2 data-i18n="trendTitle">Trending shows</h2>
+    <div class="tabs">
+      <button type="button" class="tab active" data-source="xyzrank" data-i18n="tabZh">中文</button>
+      <button type="button" class="tab" data-source="apple" data-i18n="tabIntl">International</button>
+      <button type="button" class="btn ghost" id="load-more" style="margin-left:auto" data-i18n="loadMore">Load more</button>
+    </div>
+    <div class="grid" id="trend-grid"></div>
+    <p class="attr" data-i18n-html="trendAttr">中文数据来自 <a href="https://xyzrank.com/">xyzrank.com</a> · International from Apple Podcasts</p>
+    <p class="msg hidden" id="trend-msg"></p>
+  </section>
+
   <section id="eps-sec" class="hidden">
-    <div class="kick">// episodes</div>
+    <div class="kick" data-i18n="epsKick">// episodes</div>
     <div class="panel">
       <h3 id="eps-title">Episodes</h3>
       <p class="msg" id="eps-sub"></p>
       <div class="ep-actions">
-        <button type="button" class="btn ghost" id="sel-all">Select all</button>
-        <button type="button" class="btn ghost" id="sel-none">Clear</button>
-        <button type="button" class="btn primary" id="dl-btn">Download selected</button>
-        <button type="button" class="btn ghost" id="more-eps">Show more episodes</button>
+        <button type="button" class="btn ghost" id="more-eps" data-i18n="moreEps">Show more episodes</button>
       </div>
       <ul class="ep-list" id="ep-list"></ul>
       <div class="status" id="dl-status"></div>
@@ -158,17 +192,91 @@ details.advanced summary { cursor: pointer; font-family: Sora, sans-serif; color
   </section>
 
   <details class="advanced">
-    <summary>Already have an episode link?</summary>
+    <summary data-i18n="advSummary">Already have an episode link?</summary>
     <form class="search" id="resolve-form" style="margin-top:12px">
-      <input id="resolve-src" type="url" placeholder="Apple ?i= or 小宇宙 episode URL" required>
-      <button class="btn primary" type="submit">Download</button>
+      <input id="resolve-src" type="url" data-i18n-placeholder="resolvePh" placeholder="Apple ?i= or 小宇宙 episode URL" required>
+      <button class="btn primary" type="submit" data-i18n="resolveBtn">Download</button>
     </form>
-    <p class="msg">Power-user path. Prefer search / trending above.</p>
+    <p class="msg" data-i18n="advHint">Power-user path. Prefer search / trending above.</p>
   </details>
 </div>
 <script>
 (function () {
+  const I18N = {
+    en: {
+      brandSub: "serve · localhost",
+      heroTitle: "Find episodes from any show.",
+      heroAccent: "Download in your browser.",
+      heroLead: "Search or pick a trending show, then download one episode at a time from the audio host. No accounts, no queues — podpull never proxies the file.",
+      searchPh: "Search shows (e.g. 睡前故事, The Daily)",
+      searchBtn: "Search",
+      searching: "Searching…",
+      found: (n, q) => `${n} show${n === 1 ? "" : "s"} for “${q}”`,
+      none: (q) => `No shows found for “${q}”.`,
+      resultsKick: "// search results",
+      resultsTitle: "Search results",
+      trendKick: "// trending",
+      trendTitle: "Trending shows",
+      tabZh: "中文",
+      tabIntl: "International",
+      loadMore: "Load more",
+      trendAttr: '中文数据来自 <a href="https://xyzrank.com/">xyzrank.com</a> · International from Apple Podcasts',
+      epsKick: "// episodes",
+      epsLoading: "Loading…",
+      epsSub: (n) => `${n} episode(s) · download one at a time (browsers block bulk downloads)`,
+      moreEps: "Show more episodes",
+      dlOne: "Download",
+      downloading: "Downloading…",
+      savedOne: "Saved to your downloads.",
+      openedOne: "Opened in a new tab — use Save As if it plays.",
+      dlFail: "Could not download.",
+      openPage: "Open page",
+      advSummary: "Already have an episode link?",
+      resolvePh: "Apple ?i= or 小宇宙 episode URL",
+      resolveBtn: "Download",
+      advHint: "Power-user path. Prefer search / trending above.",
+      savedAlert: "Saved.",
+      openedAlert: "Opened in a new tab. Use Save As if it plays.",
+    },
+    zh: {
+      brandSub: "serve · 本机",
+      heroTitle: "搜任意节目。",
+      heroAccent: "在浏览器里下载。",
+      heroLead: "搜索或点选热门节目，逐集从音频源下载。无需账号、无需排队 — podpull 不中转音频。",
+      searchPh: "搜索节目（如：睡前故事、The Daily）",
+      searchBtn: "搜索",
+      searching: "搜索中…",
+      found: (n, q) => `找到 ${n} 个与「${q}」相关的节目`,
+      none: (q) => `没有找到「${q}」相关节目。`,
+      resultsKick: "// 搜索结果",
+      resultsTitle: "搜索结果",
+      trendKick: "// 热门",
+      trendTitle: "热门节目",
+      tabZh: "中文",
+      tabIntl: "International",
+      loadMore: "加载更多",
+      trendAttr: '中文数据来自 <a href="https://xyzrank.com/">xyzrank.com</a> · International 来自 Apple Podcasts',
+      epsKick: "// 单集",
+      epsLoading: "加载中…",
+      epsSub: (n) => `${n} 集 · 请逐集下载（浏览器默认会拦截批量下载）`,
+      moreEps: "显示更多单集",
+      dlOne: "下载",
+      downloading: "下载中…",
+      savedOne: "已保存到下载文件夹。",
+      openedOne: "已在新标签页打开 — 若直接播放请用「另存为」。",
+      dlFail: "下载失败。",
+      openPage: "打开页面",
+      advSummary: "已有单集链接？",
+      resolvePh: "Apple ?i= 或小宇宙单集链接",
+      resolveBtn: "下载",
+      advHint: "进阶入口。优先用上方搜索 / 热门。",
+      savedAlert: "已保存。",
+      openedAlert: "已在新标签页打开。若直接播放，请用「另存为」。",
+    },
+  };
+
   const state = {
+    lang: localStorage.getItem("podpull-lang") || "en",
     source: "xyzrank",
     offset: 0,
     limit: 24,
@@ -182,6 +290,30 @@ details.advanced summary { cursor: pointer; font-family: Sora, sans-serif; color
   const trendGrid = $("trend-grid");
   const searchGrid = $("search-grid");
   const epList = $("ep-list");
+  const t = () => I18N[state.lang] || I18N.en;
+
+  function applyI18n() {
+    const dict = t();
+    document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "en";
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.getAttribute("data-i18n");
+      const val = dict[key];
+      if (typeof val === "string") el.textContent = val;
+    });
+    document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+      const key = el.getAttribute("data-i18n-html");
+      const val = dict[key];
+      if (typeof val === "string") el.innerHTML = val;
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+      const key = el.getAttribute("data-i18n-placeholder");
+      const val = dict[key];
+      if (typeof val === "string") el.setAttribute("placeholder", val);
+    });
+    document.querySelectorAll(".lang button").forEach((b) => {
+      b.classList.toggle("active", b.dataset.lang === state.lang);
+    });
+  }
 
   async function api(path) {
     const r = await fetch(path);
@@ -191,7 +323,11 @@ details.advanced summary { cursor: pointer; font-family: Sora, sans-serif; color
   }
 
   function showSrc(s) {
-    return s.feed || s.feed_url || s.apple_id || s.page_url || "";
+    if (s.feed_url) return s.feed_url;
+    if (s.feed) return s.feed;
+    if (s.apple_id) return String(s.apple_id);
+    if (s.page_url) return s.page_url;
+    return "";
   }
 
   function cardEl(s, onClick) {
@@ -200,14 +336,14 @@ details.advanced summary { cursor: pointer; font-family: Sora, sans-serif; color
     b.className = "card";
     const img = s.artwork
       ? `<img src="${esc(s.artwork)}" alt="" loading="lazy">`
-      : `<div style="aspect-ratio:1;border-radius:10px;background:#151821"></div>`;
+      : `<div class="ph" aria-hidden="true"></div>`;
     b.innerHTML = `${img}<div class="rk">#${s.rank || "·"}</div><div class="tt">${esc(s.title || "")}</div><div class="au">${esc(s.author || "")}</div>`;
     b.addEventListener("click", () => onClick(s));
     return b;
   }
 
-  function esc(t) {
-    return String(t).replace(/[&<>"']/g, (c) => ({
+  function esc(text) {
+    return String(text).replace(/[&<>"']/g, (c) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
     })[c]);
   }
@@ -249,7 +385,7 @@ details.advanced summary { cursor: pointer; font-family: Sora, sans-serif; color
     state.epLimit = 40;
     $("eps-sec").classList.remove("hidden");
     $("eps-title").textContent = s.title || "Episodes";
-    $("eps-sub").textContent = "Loading…";
+    $("eps-sub").textContent = t().epsLoading;
     epList.innerHTML = "";
     $("dl-status").textContent = "";
     try {
@@ -257,7 +393,7 @@ details.advanced summary { cursor: pointer; font-family: Sora, sans-serif; color
       const data = await api("/api/list?" + q);
       state.episodes = data.episodes || [];
       $("eps-title").textContent = (data.show && data.show.title) || s.title || "Episodes";
-      $("eps-sub").textContent = `${state.episodes.length} episode(s) · enclosure URLs open in your browser`;
+      $("eps-sub").textContent = t().epsSub(state.episodes.length);
       renderEps();
       $("eps-sec").scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (e) {
@@ -267,25 +403,47 @@ details.advanced summary { cursor: pointer; font-family: Sora, sans-serif; color
 
   function renderEps() {
     epList.innerHTML = "";
+    const dict = t();
     state.episodes.forEach((ep, i) => {
       const li = document.createElement("li");
-      const page = ep.link
-        ? `<a href="${esc(ep.link)}" target="_blank" rel="noopener">Open page</a>`
+      const pageBtn = ep.link
+        ? `<a class="btn ghost" href="${esc(ep.link)}" target="_blank" rel="noopener">${esc(dict.openPage)}</a>`
         : "";
-      li.innerHTML = `<input type="checkbox" data-i="${i}" ${i < 3 ? "checked" : ""}>
-        <div><div>${esc(ep.title)}</div><div class="meta">${esc(ep.date)} · #${ep.index}</div></div>
-        <div>${page}</div>`;
+      li.innerHTML = `
+        <div>
+          <div>${esc(ep.title)}</div>
+          <div class="meta">${esc(ep.date)} · #${ep.index}</div>
+        </div>
+        <div class="ep-btns">
+          <button type="button" class="btn primary ep-dl" data-i="${i}">${esc(dict.dlOne)}</button>
+          ${pageBtn}
+        </div>`;
+      const dlBtn = li.querySelector(".ep-dl");
+      dlBtn.addEventListener("click", async () => {
+        dlBtn.disabled = true;
+        const prev = dlBtn.textContent;
+        dlBtn.textContent = dict.downloading;
+        $("dl-status").textContent = "";
+        try {
+          const mode = await downloadOne(ep);
+          $("dl-status").innerHTML =
+            mode === "saved"
+              ? `<span class="ok">${esc(dict.savedOne)}</span>`
+              : `<span class="ok">${esc(dict.openedOne)}</span>`;
+        } catch (e) {
+          $("dl-status").innerHTML =
+            `<span class="err">${esc(dict.dlFail)} ${esc(e.message || e)}</span>`;
+        } finally {
+          dlBtn.disabled = false;
+          dlBtn.textContent = t().dlOne;
+        }
+      });
       epList.appendChild(li);
     });
   }
 
-  function selectedEps() {
-    return [...epList.querySelectorAll("input[type=checkbox]:checked")].map((el) =>
-      state.episodes[Number(el.dataset.i)]
-    ).filter(Boolean);
-  }
-
   async function downloadOne(ep) {
+    if (!ep || !ep.url) throw new Error("missing audio URL");
     const name = safeName((ep.date || "episode") + " - " + (ep.title || "audio")) + guessExt(ep.url);
     try {
       const res = await fetch(ep.url, { mode: "cors" });
@@ -314,29 +472,21 @@ details.advanced summary { cursor: pointer; font-family: Sora, sans-serif; color
     return ".mp3";
   }
 
-  async function downloadSelected() {
-    const eps = selectedEps();
-    if (!eps.length) {
-      $("dl-status").innerHTML = '<span class="err">Select at least one episode.</span>';
-      return;
-    }
-    if (eps.length > 5 && !confirm(`Open/save ${eps.length} episodes (one tab or file each)?`)) return;
-    $("dl-status").textContent = "Working…";
-    let saved = 0, opened = 0;
-    for (const ep of eps) {
-      const r = await downloadOne(ep);
-      if (r === "saved") saved++; else opened++;
-    }
-    $("dl-status").innerHTML =
-      `<span class="ok">Done:</span> ${saved} saved via blob` +
-      (opened ? `, ${opened} opened in a new tab` : "") +
-      `. <span class="mono">If audio plays in-tab, use Save As.</span>`;
-  }
+  document.querySelectorAll(".lang button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.lang = btn.dataset.lang;
+      localStorage.setItem("podpull-lang", state.lang);
+      applyI18n();
+      if (state.episodes.length) {
+        $("eps-sub").textContent = t().epsSub(state.episodes.length);
+        renderEps();
+      }
+    });
+  });
 
-  // tabs
   document.querySelectorAll(".tab").forEach((tab) => {
     tab.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach((x) => x.classList.remove("active"));
       tab.classList.add("active");
       state.source = tab.dataset.source;
       loadTrending(false);
@@ -348,42 +498,48 @@ details.advanced summary { cursor: pointer; font-family: Sora, sans-serif; color
     ev.preventDefault();
     const term = $("q").value.trim();
     if (!term) return;
-    $("results-sec").classList.remove("hidden");
-    searchGrid.innerHTML = '<p class="msg">Searching…</p>';
+    const status = $("search-status");
+    const sec = $("results-sec");
+    sec.classList.remove("hidden");
+    status.textContent = t().searching;
+    searchGrid.innerHTML = `<p class="msg">${esc(t().searching)}</p>`;
+    sec.scrollIntoView({ behavior: "smooth", block: "start" });
     try {
       const data = await api("/api/search?" + new URLSearchParams({ q: term, limit: "12" }));
+      const rows = data.results || [];
       searchGrid.innerHTML = "";
-      (data.results || []).forEach((r, i) => {
+      rows.forEach((r, i) => {
         const s = {
           rank: i + 1,
           title: r.title,
           author: r.author,
           apple_id: r.apple_id,
-          feed: r.feed_url,
-          artwork: "",
+          feed_url: r.feed_url,
+          artwork: r.artwork || "",
         };
         searchGrid.appendChild(cardEl(s, openShow));
       });
-      if (!(data.results || []).length) searchGrid.innerHTML = '<p class="msg">No shows found.</p>';
+      if (!rows.length) {
+        status.textContent = t().none(term);
+        searchGrid.innerHTML = `<p class="msg">${esc(t().none(term))}</p>`;
+      } else {
+        status.textContent = t().found(rows.length, term);
+        $("results-title").textContent = t().found(rows.length, term);
+      }
     } catch (e) {
-      searchGrid.innerHTML = `<p class="msg">${esc(e.message || e)}</p>`;
+      const msg = String(e.message || e);
+      status.textContent = msg;
+      searchGrid.innerHTML = `<p class="msg">${esc(msg)}</p>`;
     }
   });
 
-  $("sel-all").addEventListener("click", () => {
-    epList.querySelectorAll("input[type=checkbox]").forEach((c) => { c.checked = true; });
-  });
-  $("sel-none").addEventListener("click", () => {
-    epList.querySelectorAll("input[type=checkbox]").forEach((c) => { c.checked = false; });
-  });
-  $("dl-btn").addEventListener("click", downloadSelected);
   $("more-eps").addEventListener("click", async () => {
     if (!state.currentSrc) return;
     state.epLimit = Math.max(state.epLimit, state.episodes.length) + 40;
     const q = new URLSearchParams({ src: state.currentSrc, limit: String(state.epLimit) });
     const data = await api("/api/list?" + q);
     state.episodes = data.episodes || [];
-    $("eps-sub").textContent = `${state.episodes.length} episode(s)`;
+    $("eps-sub").textContent = t().epsSub(state.episodes.length);
     renderEps();
   });
 
@@ -399,12 +555,13 @@ details.advanced summary { cursor: pointer; font-family: Sora, sans-serif; color
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || "resolve failed");
       const mode = await downloadOne(j);
-      alert(mode === "saved" ? "Saved." : "Opened in a new tab. Use Save As if it plays.");
+      alert(mode === "saved" ? t().savedAlert : t().openedAlert);
     } catch (e) {
       alert(String(e.message || e));
     }
   });
 
+  applyI18n();
   loadTrending(false);
 })();
 </script>

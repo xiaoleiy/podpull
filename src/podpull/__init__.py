@@ -6,4 +6,4 @@ walks that chain (Apple/RSS/xiaoyuzhou link -> feed -> enclosure) and downloads
 the file. Stdlib only.
 """
 
-__version__ = "0.8.0"
+__version__ = "0.8.1"

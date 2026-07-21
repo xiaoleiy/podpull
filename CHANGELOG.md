@@ -3,6 +3,21 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
+## [0.8.1] — 2026-07-21
+
+### Fixed
+- **`podpull serve` search results** now appear above trending (with status text and artwork),
+  so keyword search no longer looks like a no-op.
+- Show tiles share a fixed footprint (square art + reserved title/author lines) in trending
+  and search grids.
+
+### Changed
+- Episode list uses per-row **Download** / **Open page** actions instead of multi-select bulk
+  download (browsers block multiple file downloads by default).
+- Serve UI and marketing landing: EN / 中文 language switch (preference in `localStorage`).
+- Landing hero copy aligned to: find episodes → download to disk (`~/Downloads/Podcasts`).
+- Serve favicon uses the podpull icon (`icon.svg` / `favicon-32.png`).
+
 ## [0.8.0] — 2026-07-21
 
 ### Added
