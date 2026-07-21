@@ -1,6 +1,6 @@
 # Design: `podpull serve` local web UI
 
-Date: 2026-07-21 · Target release: **v0.8.0** (tentative) · Status: **ready for user review**
+Date: 2026-07-21 · Target release: **v0.8.0** (tentative) · Status: **amended — trending discovery; awaiting re-approval**
 
 Backlog source: Obsidian `Projects/Podpull/调研 Investigation.md` → 调研 2
 (local web UI as GUI demand probe); Follow-ups sequencing **A `--json` → B serve → C BYOK**.
@@ -20,6 +20,13 @@ Open Design project: `podpull-serve-ui` (frontend-design skill, Aurora brand).
    Open Design (no React/build toolchain at runtime). Approach **2** from brainstorming.
 5. **Brand:** Aurora (match landing: `#080a11`, mint `#35e0a1`, cyan `#3bc7ff`, Sora /
    Manrope / JetBrains Mono, soft aurora blobs).
+6. **Trending discovery (amendment 2026-07-21):**
+   - **`podpull serve`:** interactive trending — tabs **中文 (xyzrank 热门播客)** +
+     **International (Apple Top Podcasts)**; click a show → episode list → download.
+     Also keep free-text search.
+   - **Marketing landing (`docs/index.html`):** live **Apple charts only** (browser fetch;
+     CORS `*`). Teaser cards link to install / “run `podpull serve`” — **no download on
+     Pages**. xyzrank stays serve-only (API lacks reliable browser CORS).
 
 ## Non-goals (v0.8)
 
@@ -68,10 +75,22 @@ All under `/api/…`, JSON in/out, UTF-8. Errors: `{ "error": "…" }` + 4xx/5xx
 | Method | Path | Body / query | Success |
 |---|---|---|---|
 | GET | `/api/health` | — | `{ "ok": true, "version": "…" }` |
+| GET | `/api/trending?source=xyzrank\|apple&limit=20&country=US` | — | `{ "source", "country"?, "shows": [ { rank, title, author, apple_id?, feed?, artwork?, links? } ] }` |
 | GET | `/api/search?q=&limit=` | — | same shape as `--json search` (`query` + `results`) |
 | GET | `/api/info?src=` | — | `--json info` shape |
 | GET | `/api/list?src=&match=&limit=&all=` | — | `--json list` shape |
 | POST | `/api/download` | `{ "src": "…", "match"?, "latest"?, "index"?, "out"? }` | `{ "show": {…}, "downloads": [ {date,title,url,path} ] }` |
+
+### Trending data sources (verified 2026-07-21)
+
+| Source | URL | Notes |
+|---|---|---|
+| xyzrank 热门播客 | `GET https://xyzrank.com/api/podcasts` | JSON `{ items: [...] }`; each item has `name`, `logoURL`, `links[]` with `apple` / `rss` / `xyz`. Prefer `apple` id or `rss` as `src` for list/download. Credit: [中文播客榜](https://xyzrank.com/) / 枫言枫语. |
+| Apple Top Podcasts | `GET https://itunes.apple.com/{cc}/rss/toppodcasts/limit={N}/json` | Official RSS-JSON; `entry[].id.attributes.im:id` → Apple show id. Default `cc=US` for International tab; optional CN storefront is a later tweak. CORS `*` (also usable from Pages). |
+
+- Serve fetches these **server-side** (stdlib `urllib`); short in-memory TTL cache (~15–60 min) to be polite.
+- On xyzrank failure: return Apple-only + warning field; never block the whole UI.
+- Do **not** scrape xyzrank HTML; use their public JSON only. Respect their non-official disclaimer in UI footer/attribution.
 
 - Paste-link path: `POST /api/download` with episode URL as `src` (no selector).
 - Browse path: `search` → `list` → `download` with `index` / `match` / `latest`.
@@ -98,15 +117,23 @@ All under `/api/…`, JSON in/out, UTF-8. Errors: `{ "error": "…" }` + 4xx/5xx
 
 ## UI structure (product; visuals from OD)
 
-Open Design rewrite (`index.html`, ~37KB) implements:
-
 1. **Hero:** brand `podpull` (mint on “pull”), one headline, one line, paste field + Download; aurora blobs on `#080a11`.
-2. **Browse:** collapsed toggle → search mock shows → episode checkboxes → Download selected.
-3. **Status:** progress → success with `~/Downloads/Podcasts/…` mono path + Copy → error.
+2. **Trending (new):** below hero — chips/tabs **中文** | **International**; horizontal or compact grid of top shows (art + title + rank). Click → load episodes (same panel as browse). Attribution line for xyzrank / Apple.
+3. **Browse / search:** free-text search (existing) when the user wants a specific show; episode checkboxes → Download selected.
+4. **Status:** progress → success with path + Copy → error.
 
-Session log accumulates in the mock (in-memory / localStorage OK for prototype; ship with in-memory only unless trivial).
+Hero stays one composition (no trending cards *inside* the first viewport). Trending is the next section — discovery without competing with paste CTA.
 
-Handoff: copy/adapt into `src/podpull/serve/static/`, replace mock JS with `fetch('/api/…')` against the API table above. Keep Aurora tokens and layout; drop any leftover demo-only chrome.
+Handoff: copy/adapt OD HTML into `src/podpull/serve/static/`, wire `fetch('/api/trending')` + list/download.
+
+## Marketing landing (`docs/index.html`) — companion
+
+- New section **after** the hero pipeline (not inside the first viewport): “Trending on Apple Podcasts” — fetch
+  `https://itunes.apple.com/us/rss/toppodcasts/limit=8/json` client-side; render title + artwork + rank.
+- Each card links to the Apple show URL (and/or a monospace hint `podpull get <id>`).
+- CTA under the strip: install brew/pipx + “For 中文榜 + one-click download: `podpull serve`”.
+- No xyzrank on Pages (CORS). Fail soft: hide section or show “charts unavailable”.
+- Keep Aurora visual language; one job for the section (discovery teaser only).
 
 ## Packaging & docs
 
@@ -126,9 +153,11 @@ Handoff: copy/adapt into `src/podpull/serve/static/`, replace mock JS with `fetc
 
 - `podpull serve` opens UI on loopback; paste a known xiaoyuzhou/Apple episode link →
   file appears under `--out`; UI shows path.
-- Browse flow: search → list → multi-download into per-show folder when N>1 (same as CLI).
-- Offline tests: mock `core`, hit handlers with `http.client` / handler unit tests.
-- `core.py` unchanged in purity; no new runtime deps.
+- Trending: 中文 tab loads xyzrank shows; International loads Apple US top; click → episodes → download.
+- Browse/search still works alongside trending.
+- Landing: Apple top strip renders (or soft-fails); no download from Pages.
+- Offline tests: mock trending fetchers; handler unit tests. Default suite never hits network.
+- `core.py` purity intact; no new runtime deps.
 
 ## Out of scope
 
