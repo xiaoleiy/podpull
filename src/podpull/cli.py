@@ -392,6 +392,40 @@ def cmd_get(args) -> int:
 
 
 # --------------------------------------------------------------------------- #
+# serve — local metadata UI (browser downloads enclosure URLs)
+# --------------------------------------------------------------------------- #
+def cmd_serve(args) -> int:
+    import webbrowser
+    from .serve.server import serve_forever
+
+    host = args.host
+    port = args.port
+    if host not in ("127.0.0.1", "localhost", "::1"):
+        ui.print("[bold yellow]warning:[/] binding to non-loopback "
+                 f"[cyan]{host}[/] — anyone on that network can use this UI")
+
+    def on_start(url: str) -> None:
+        ui.print(f"[green]podpull serve[/] listening at [bold cyan]{url}[/]")
+        ui.print("[dim]Search / trending → pick episodes → browser download "
+                 "(no audio proxy). Ctrl-C to stop.[/]")
+        if not args.no_open:
+            try:
+                webbrowser.open(url)
+            except Exception:
+                pass
+
+    try:
+        serve_forever(host, port, on_start=on_start)
+    except KeyboardInterrupt:
+        ui.print("\n[dim]stopped[/]")
+        return 0
+    except OSError as e:
+        _err(str(e))
+        return 1
+    return 0
+
+
+# --------------------------------------------------------------------------- #
 # skills — install podpull integrations into AI coding agents
 # --------------------------------------------------------------------------- #
 def _skills_agents(args) -> "list[str] | None":
@@ -520,6 +554,17 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--no-input", action="store_true",
                    help="never prompt; fail instead of opening the interactive picker")
     s.set_defaults(func=cmd_get)
+
+    s = sub.add_parser("serve", help="local web UI (search / trending / browser download)",
+                       formatter_class=_Formatter,
+                       description="Open a localhost UI: search or browse trending shows, pick "
+                                   "episodes, then download enclosure URLs in the browser "
+                                   "(blob-save when CORS allows, else new tab). Does not proxy audio.")
+    s.add_argument("--host", default="127.0.0.1", metavar="ADDR",
+                   help="bind address (default 127.0.0.1; use 0.0.0.0 for LAN)")
+    s.add_argument("--port", type=int, default=8787, metavar="N", help="port (default 8787)")
+    s.add_argument("--no-open", action="store_true", help="do not open a browser")
+    s.set_defaults(func=cmd_serve)
 
     sk = sub.add_parser("skills", formatter_class=_Formatter,
                         help="set up podpull integrations for AI agents",

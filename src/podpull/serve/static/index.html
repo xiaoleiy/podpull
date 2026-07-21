@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>podpull serve</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080a11; --card: rgba(255,255,255,.04); --line: rgba(255,255,255,.10);
+  --txt: #e7ecf5; --dim: #8b93a7; --mint: #35e0a1; --cyan: #3bc7ff; --bad: #ff6b7a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--txt);
+  font-family: Manrope, system-ui, sans-serif; font-size: 16px; line-height: 1.5;
+  min-height: 100vh; position: relative; overflow-x: hidden;
+}
+.aurora { position: fixed; inset: -20% -10% auto; height: 70vh; z-index: 0;
+  filter: blur(70px); opacity: .45; pointer-events: none; }
+.aurora b { position: absolute; border-radius: 50%; mix-blend-mode: screen;
+  animation: drift 22s ease-in-out infinite; display: block; }
+.aurora b:nth-child(1) { width: 42vw; height: 42vw; left: 2%; top: -8%; background: #15c98a; }
+.aurora b:nth-child(2) { width: 36vw; height: 36vw; right: 4%; top: -12%; background: #1f7bff; animation-delay: -7s; }
+.aurora b:nth-child(3) { width: 28vw; height: 28vw; left: 40%; top: 12%; background: #9b5cff; animation-delay: -13s; }
+@keyframes drift {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(4%,6%) scale(1.08); }
+  66% { transform: translate(-3%,3%) scale(.95); }
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 22px; position: relative; z-index: 1; }
+.brand { font-family: Sora, sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -.02em; padding: 22px 0 8px; }
+.brand i { color: var(--mint); font-style: normal; }
+.hero { padding: 36px 0 28px; }
+.hero h1 { font-family: Sora, sans-serif; font-weight: 800; font-size: clamp(28px, 5vw, 44px);
+  letter-spacing: -.03em; line-height: 1.1; margin-bottom: 12px; max-width: 18ch; }
+.hero h1 .g { background: linear-gradient(100deg, var(--mint), var(--cyan));
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p { color: var(--dim); max-width: 42ch; margin-bottom: 22px; }
+.search { display: flex; gap: 10px; flex-wrap: wrap; }
+.search input {
+  flex: 1 1 240px; min-width: 0; padding: 14px 16px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--card); color: var(--txt);
+  font: inherit; backdrop-filter: blur(12px);
+}
+.search input:focus { outline: 1px solid var(--mint); }
+.btn {
+  font-family: "JetBrains Mono", monospace; font-size: 13px; padding: 14px 18px;
+  border-radius: 12px; border: 0; cursor: pointer; font-weight: 600;
+}
+.btn.primary { background: linear-gradient(100deg, var(--mint), var(--cyan)); color: #04150e; }
+.btn.primary:hover { transform: translateY(-1px); }
+.btn.ghost { background: var(--card); border: 1px solid var(--line); color: var(--txt); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+section { padding: 28px 0; }
+.kick { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--mint); margin-bottom: 8px; }
+h2 { font-family: Sora, sans-serif; font-size: 22px; margin-bottom: 14px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+.tab {
+  font-family: "JetBrains Mono", monospace; font-size: 12px; padding: 8px 12px;
+  border-radius: 999px; border: 1px solid var(--line); background: transparent;
+  color: var(--dim); cursor: pointer; letter-spacing: .02em;
+}
+.tab.active { color: #04150e; background: var(--mint); border-color: transparent; font-weight: 600; }
+.grid {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+}
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } .search { flex-direction: column; } }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 10px; cursor: pointer; text-align: left; color: inherit; font: inherit;
+  transition: transform .15s, border-color .15s;
+}
+.card:hover { transform: translateY(-2px); border-color: rgba(53,224,161,.35); }
+.card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; background: #111; display: block; }
+.card .rk { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--mint); margin: 8px 0 2px; }
+.card .tt { font-family: Sora, sans-serif; font-size: 13px; font-weight: 600; line-height: 1.25;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card .au { font-size: 12px; color: var(--dim); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.attr { font-size: 12px; color: var(--dim); margin-top: 12px; }
+.panel {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 16px; backdrop-filter: blur(12px); margin-top: 8px;
+}
+.panel h3 { font-family: Sora, sans-serif; font-size: 18px; margin-bottom: 4px; }
+.ep-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.ep-list { list-style: none; max-height: 420px; overflow: auto; }
+.ep-list li {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center;
+  padding: 10px 4px; border-bottom: 1px solid var(--line); font-size: 14px;
+}
+.ep-list .meta { color: var(--dim); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.ep-list a { color: var(--cyan); font-size: 12px; text-decoration: none; }
+.status { margin-top: 10px; font-size: 14px; }
+.status .ok { color: var(--mint); }
+.status .err { color: var(--bad); }
+.mono { font-family: "JetBrains Mono", monospace; font-size: 12px; word-break: break-all; }
+details.advanced {
+  margin: 28px 0 40px; border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 14px; background: var(--card); color: var(--dim);
+}
+details.advanced summary { cursor: pointer; font-family: Sora, sans-serif; color: var(--txt); }
+.hidden { display: none !important; }
+.msg { color: var(--dim); font-size: 14px; padding: 12px 0; }
+</style>
+</head>
+<body>
+<div class="aurora"><b></b><b></b><b></b></div>
+<div class="wrap">
+  <div class="brand">pod<i>pull</i> <span style="color:var(--dim);font-weight:500;font-size:13px;margin-left:8px">serve · localhost</span></div>
+
+  <header class="hero">
+    <h1>Find episodes from any show. <span class="g">Download in your browser.</span></h1>
+    <p>Search or pick a trending show, select episodes, then save via the audio host — podpull never proxies the file.</p>
+    <form class="search" id="search-form">
+      <input id="q" type="search" placeholder="Search shows (e.g. 睡前故事, The Daily)" autocomplete="off" required>
+      <button class="btn primary" type="submit">Search</button>
+    </form>
+  </header>
+
+  <section>
+    <div class="kick">// trending</div>
+    <h2>Trending shows</h2>
+    <div class="tabs">
+      <button type="button" class="tab active" data-source="xyzrank">中文</button>
+      <button type="button" class="tab" data-source="apple">International</button>
+      <button type="button" class="btn ghost" id="load-more" style="margin-left:auto">Load more</button>
+    </div>
+    <div class="grid" id="trend-grid"></div>
+    <p class="attr">中文数据来自 <a href="https://xyzrank.com/" style="color:var(--mint)">xyzrank.com</a> · International from Apple Podcasts</p>
+    <p class="msg hidden" id="trend-msg"></p>
+  </section>
+
+  <section id="results-sec" class="hidden">
+    <div class="kick">// search results</div>
+    <h2>Search results</h2>
+    <div class="grid" id="search-grid"></div>
+  </section>
+
+  <section id="eps-sec" class="hidden">
+    <div class="kick">// episodes</div>
+    <div class="panel">
+      <h3 id="eps-title">Episodes</h3>
+      <p class="msg" id="eps-sub"></p>
+      <div class="ep-actions">
+        <button type="button" class="btn ghost" id="sel-all">Select all</button>
+        <button type="button" class="btn ghost" id="sel-none">Clear</button>
+        <button type="button" class="btn primary" id="dl-btn">Download selected</button>
+        <button type="button" class="btn ghost" id="more-eps">Show more episodes</button>
+      </div>
+      <ul class="ep-list" id="ep-list"></ul>
+      <div class="status" id="dl-status"></div>
+    </div>
+  </section>
+
+  <details class="advanced">
+    <summary>Already have an episode link?</summary>
+    <form class="search" id="resolve-form" style="margin-top:12px">
+      <input id="resolve-src" type="url" placeholder="Apple ?i= or 小宇宙 episode URL" required>
+      <button class="btn primary" type="submit">Download</button>
+    </form>
+    <p class="msg">Power-user path. Prefer search / trending above.</p>
+  </details>
+</div>
+<script>
+(function () {
+  const state = {
+    source: "xyzrank",
+    offset: 0,
+    limit: 24,
+    shows: [],
+    currentSrc: "",
+    episodes: [],
+    epLimit: 40,
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const trendGrid = $("trend-grid");
+  const searchGrid = $("search-grid");
+  const epList = $("ep-list");
+
+  async function api(path) {
+    const r = await fetch(path);
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.statusText);
+    return j;
+  }
+
+  function showSrc(s) {
+    return s.feed || s.feed_url || s.apple_id || s.page_url || "";
+  }
+
+  function cardEl(s, onClick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "card";
+    const img = s.artwork
+      ? `<img src="${esc(s.artwork)}" alt="" loading="lazy">`
+      : `<div style="aspect-ratio:1;border-radius:10px;background:#151821"></div>`;
+    b.innerHTML = `${img}<div class="rk">#${s.rank || "·"}</div><div class="tt">${esc(s.title || "")}</div><div class="au">${esc(s.author || "")}</div>`;
+    b.addEventListener("click", () => onClick(s));
+    return b;
+  }
+
+  function esc(t) {
+    return String(t).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    })[c]);
+  }
+
+  async function loadTrending(append) {
+    $("trend-msg").classList.add("hidden");
+    if (!append) {
+      state.offset = 0;
+      state.shows = [];
+      trendGrid.innerHTML = "";
+    }
+    try {
+      const q = new URLSearchParams({
+        source: state.source,
+        limit: String(state.limit),
+        offset: String(state.offset),
+        country: "US",
+      });
+      const data = await api("/api/trending?" + q);
+      const batch = data.shows || [];
+      if (data.warning && !batch.length) {
+        $("trend-msg").textContent = data.warning;
+        $("trend-msg").classList.remove("hidden");
+      }
+      state.shows = append ? state.shows.concat(batch) : batch;
+      state.offset += batch.length;
+      if (!append) trendGrid.innerHTML = "";
+      batch.forEach((s) => trendGrid.appendChild(cardEl(s, openShow)));
+    } catch (e) {
+      $("trend-msg").textContent = String(e.message || e);
+      $("trend-msg").classList.remove("hidden");
+    }
+  }
+
+  async function openShow(s) {
+    const src = showSrc(s);
+    if (!src) return;
+    state.currentSrc = src;
+    state.epLimit = 40;
+    $("eps-sec").classList.remove("hidden");
+    $("eps-title").textContent = s.title || "Episodes";
+    $("eps-sub").textContent = "Loading…";
+    epList.innerHTML = "";
+    $("dl-status").textContent = "";
+    try {
+      const q = new URLSearchParams({ src, limit: String(state.epLimit) });
+      const data = await api("/api/list?" + q);
+      state.episodes = data.episodes || [];
+      $("eps-title").textContent = (data.show && data.show.title) || s.title || "Episodes";
+      $("eps-sub").textContent = `${state.episodes.length} episode(s) · enclosure URLs open in your browser`;
+      renderEps();
+      $("eps-sec").scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (e) {
+      $("eps-sub").textContent = String(e.message || e);
+    }
+  }
+
+  function renderEps() {
+    epList.innerHTML = "";
+    state.episodes.forEach((ep, i) => {
+      const li = document.createElement("li");
+      const page = ep.link
+        ? `<a href="${esc(ep.link)}" target="_blank" rel="noopener">Open page</a>`
+        : "";
+      li.innerHTML = `<input type="checkbox" data-i="${i}" ${i < 3 ? "checked" : ""}>
+        <div><div>${esc(ep.title)}</div><div class="meta">${esc(ep.date)} · #${ep.index}</div></div>
+        <div>${page}</div>`;
+      epList.appendChild(li);
+    });
+  }
+
+  function selectedEps() {
+    return [...epList.querySelectorAll("input[type=checkbox]:checked")].map((el) =>
+      state.episodes[Number(el.dataset.i)]
+    ).filter(Boolean);
+  }
+
+  async function downloadOne(ep) {
+    const name = safeName((ep.date || "episode") + " - " + (ep.title || "audio")) + guessExt(ep.url);
+    try {
+      const res = await fetch(ep.url, { mode: "cors" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      return "saved";
+    } catch (_) {
+      window.open(ep.url, "_blank", "noopener");
+      return "opened";
+    }
+  }
+
+  function safeName(s) {
+    return s.replace(/[\\/:*?"<>|]/g, " ").replace(/\s+/g, " ").trim().slice(0, 120) || "episode";
+  }
+  function guessExt(url) {
+    const u = (url || "").split("?")[0].toLowerCase();
+    if (u.endsWith(".m4a") || u.endsWith(".mp4") || u.endsWith(".aac")) return ".m4a";
+    return ".mp3";
+  }
+
+  async function downloadSelected() {
+    const eps = selectedEps();
+    if (!eps.length) {
+      $("dl-status").innerHTML = '<span class="err">Select at least one episode.</span>';
+      return;
+    }
+    if (eps.length > 5 && !confirm(`Open/save ${eps.length} episodes (one tab or file each)?`)) return;
+    $("dl-status").textContent = "Working…";
+    let saved = 0, opened = 0;
+    for (const ep of eps) {
+      const r = await downloadOne(ep);
+      if (r === "saved") saved++; else opened++;
+    }
+    $("dl-status").innerHTML =
+      `<span class="ok">Done:</span> ${saved} saved via blob` +
+      (opened ? `, ${opened} opened in a new tab` : "") +
+      `. <span class="mono">If audio plays in-tab, use Save As.</span>`;
+  }
+
+  // tabs
+  document.querySelectorAll(".tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      state.source = tab.dataset.source;
+      loadTrending(false);
+    });
+  });
+  $("load-more").addEventListener("click", () => loadTrending(true));
+
+  $("search-form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const term = $("q").value.trim();
+    if (!term) return;
+    $("results-sec").classList.remove("hidden");
+    searchGrid.innerHTML = '<p class="msg">Searching…</p>';
+    try {
+      const data = await api("/api/search?" + new URLSearchParams({ q: term, limit: "12" }));
+      searchGrid.innerHTML = "";
+      (data.results || []).forEach((r, i) => {
+        const s = {
+          rank: i + 1,
+          title: r.title,
+          author: r.author,
+          apple_id: r.apple_id,
+          feed: r.feed_url,
+          artwork: "",
+        };
+        searchGrid.appendChild(cardEl(s, openShow));
+      });
+      if (!(data.results || []).length) searchGrid.innerHTML = '<p class="msg">No shows found.</p>';
+    } catch (e) {
+      searchGrid.innerHTML = `<p class="msg">${esc(e.message || e)}</p>`;
+    }
+  });
+
+  $("sel-all").addEventListener("click", () => {
+    epList.querySelectorAll("input[type=checkbox]").forEach((c) => { c.checked = true; });
+  });
+  $("sel-none").addEventListener("click", () => {
+    epList.querySelectorAll("input[type=checkbox]").forEach((c) => { c.checked = false; });
+  });
+  $("dl-btn").addEventListener("click", downloadSelected);
+  $("more-eps").addEventListener("click", async () => {
+    if (!state.currentSrc) return;
+    state.epLimit = Math.max(state.epLimit, state.episodes.length) + 40;
+    const q = new URLSearchParams({ src: state.currentSrc, limit: String(state.epLimit) });
+    const data = await api("/api/list?" + q);
+    state.episodes = data.episodes || [];
+    $("eps-sub").textContent = `${state.episodes.length} episode(s)`;
+    renderEps();
+  });
+
+  $("resolve-form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const src = $("resolve-src").value.trim();
+    try {
+      const r = await fetch("/api/resolve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ src }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "resolve failed");
+      const mode = await downloadOne(j);
+      alert(mode === "saved" ? "Saved." : "Opened in a new tab. Use Save As if it plays.");
+    } catch (e) {
+      alert(String(e.message || e));
+    }
+  });
+
+  loadTrending(false);
+})();
+</script>
+</body>
+</html>
