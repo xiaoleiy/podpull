@@ -8,13 +8,14 @@
 <img src="https://img.shields.io/badge/platforms-macOS%20·%20Linux%20·%20Windows-lightgrey.svg" alt="Platforms">
 </p>
 
-<p align="center"><b>Download any podcast episode — Apple Podcasts, RSS, or 小宇宙/xiaoyuzhou — straight to your shell.</b></p>
+<p align="center"><b>Find episodes from any show. Download straight to disk — Apple Podcasts, RSS, or 小宇宙/xiaoyuzhou.</b></p>
 
-Pick episodes from an **interactive multi-select list**, with spinners and progress bars.
-No app, no login, no DRM. Files are named cloud-safe and (for multiple picks) grouped per show.
+Use the **CLI** (interactive multi-select picker, spinners, progress bars) or the
+**browser UI**. No app, no login, no DRM. Filenames are cloud-safe; multiple CLI
+picks land in a per-show folder under `~/Downloads/Podcasts`.
 
-**▶ Official site (landing + browser UI):** https://podpull.xiaolei.work  
-**▶ Mirror / demo GIF:** https://xiaoleiy.github.io/podpull
+**▶ Official site:** https://podpull.xiaolei.work — landing `/` · app [`/app`](https://podpull.xiaolei.work/app)  
+**▶ GitHub Pages mirror:** https://xiaoleiy.github.io/podpull
 
 ## Demo
 
@@ -47,8 +48,9 @@ RSS feed          ──(<enclosure url>)────▶ direct .mp3 / .m4a
 download          ──(resumable)──────────▶ <YYYY-MM-DD> - <title>.<ext>
 ```
 
-It also resolves a pasted **xiaoyuzhou** episode page (via its `og:audio` tag) and a
-pasted **Apple episode** link (`…?i=<id>`, matched in the feed).
+It also resolves a pasted **xiaoyuzhou** episode page (via its `og:audio` tag), a
+pasted **Apple episode** link (`…?i=<id>`, matched in the feed), and a **Ximalaya**
+album URL (`ximalaya.com/album/<id>` → that album's RSS).
 
 ## Install
 
@@ -61,8 +63,8 @@ pip   install podpull
 brew install xiaoleiy/tap/podpull
 ```
 
-Requires Python 3.9+. Optional: `yt-dlp` (deep-catalog Apple-episode fallback),
-`ffmpeg`/`ffprobe` (verify downloads). Also on [PyPI](https://pypi.org/project/podpull/).
+Requires Python 3.9+. Optional: `yt-dlp` (deep-catalog Apple-episode fallback when
+the track isn't in the recent feed window). Also on [PyPI](https://pypi.org/project/podpull/).
 
 ### Windows
 
@@ -93,6 +95,7 @@ Teach your AI agents to use podpull so you can just ask them to grab an episode:
 podpull skills install        # detected agents
 podpull skills install --all  # all supported agents
 podpull skills status         # see what's detected / installed
+podpull skills uninstall      # remove what was installed
 ```
 
 This writes podpull's instructions in each agent's native format:
@@ -112,9 +115,11 @@ or paste the printed rule into Cursor Settings → Rules.)
 
 ```bash
 podpull search "睡前故事"                 # find shows -> id, #episodes, name, author
+podpull search "NPR" --country US --limit 5
 podpull info  1532755821                  # show metadata (accepts URL, id, or RSS)
 podpull list  1532755821                  # recent episodes, numbered (0 = newest)
 podpull list  1532755821 --match "EP34"   # filter by title regex
+podpull list  1532755821 --all            # every episode in the feed
 ```
 
 ### Download
@@ -123,16 +128,19 @@ podpull list  1532755821 --match "EP34"   # filter by title regex
 # Interactive picker — just give a show; pick one or many episodes with the keyboard:
 podpull get 1532755821
 #   ↑/↓ move · space toggle · a select-all · enter confirm
+#   (podpull pull … is an alias for get)
 
 # Or select non-interactively (also used when piping / scripting):
 podpull get 1532755821 --latest 1               # newest episode
 podpull get 1532755821 --match "牛頭人"          # by title regex
 podpull get 1532755821 --index 0,2,5            # by list number (0 = newest)
 podpull get 1532755821 --latest 3 --out ~/Audio/bedtime
+podpull get 1532755821 --latest 1 -q            # quiet: paths on stdout only
 
-# Pasted single-episode links:
+# Pasted single-episode / album links:
 podpull get "https://www.xiaoyuzhoufm.com/episode/<id>"
 podpull get "https://podcasts.apple.com/.../id<show>?i=<track>"
+podpull get "https://www.ximalaya.com/album/<id>"
 ```
 
 Downloads default to `~/Downloads/Podcasts` (override with `--out`). The saved file
@@ -174,19 +182,30 @@ Without these, podpull behaves exactly as before (iTunes only).
 
 ### Web UI
 
-**Hosted:** [podpull.xiaolei.work/app](https://podpull.xiaolei.work/app) — search, trending (中文 / International),
-per-episode browser download. Metadata only on the server; audio comes from the publisher CDN.
-Hosting notes: [`docs/HOSTING.md`](docs/HOSTING.md).
+**Hosted** at [podpull.xiaolei.work](https://podpull.xiaolei.work):
+
+| Path | What |
+|------|------|
+| `/` | Marketing landing (live Apple Top Podcasts strip) |
+| [`/app`](https://podpull.xiaolei.work/app) | Search, trending, per-episode browser download |
+| `/api/*` | Metadata only — **no audio proxy** |
+
+In the app: search shows, browse trending (**中文** via [xyzrank](https://xyzrank.com/) ·
+**International** via Apple Top Podcasts), EN / 中文 UI, then **Download** or **Open page**
+per episode (browsers block bulk multi-file downloads). Audio always comes from the
+publisher CDN in your browser. Hosting notes: [`docs/HOSTING.md`](docs/HOSTING.md).
 
 **Local twin** (same UI/API contract):
 
 ```bash
-podpull serve                 # http://127.0.0.1:8787
+podpull serve                 # http://127.0.0.1:8787 (opens browser)
 podpull serve --port 9000
 podpull serve --host 0.0.0.0  # LAN (prints a warning)
+podpull serve --no-open       # don't open a browser
 ```
 
-For guaranteed saves into `~/Downloads/Podcasts`, keep using `podpull get`.
+For guaranteed saves into `~/Downloads/Podcasts` with cloud-safe names, keep using
+`podpull get`.
 
 ## Roadmap
 
@@ -200,8 +219,9 @@ For guaranteed saves into `~/Downloads/Podcasts`, keep using `podpull get`.
   verified against Chinese-market hosts, `ximalaya.com/album/<id>` links, optional
   Podcast Index (BYOK) search + feed-resolution fallback.
 - **v0.7**: `--json` output mode for scripting (`podpull --json list … | jq`).
-- **v0.8** (current): `podpull serve` local web UI (trending + per-episode browser download,
-  EN/中文); official hosted site at [podpull.xiaolei.work](https://podpull.xiaolei.work).
+- **v0.8** (current): `podpull serve` + hosted site at [podpull.xiaolei.work](https://podpull.xiaolei.work)
+  (landing `/`, app `/app`, metadata `/api`); trending (中文 / International); EN/中文;
+  per-episode browser download (no audio proxy).
 - **next**: BYOK summarization (`podpull[ai]`).
 - **v1+ (`podpull[ai]`)**: opt-in **BYOK summarization** — local transcription
   (faster-whisper) + your own LLM key (Anthropic/OpenAI). Fully local, private,
