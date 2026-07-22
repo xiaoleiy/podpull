@@ -13,7 +13,8 @@
 Pick episodes from an **interactive multi-select list**, with spinners and progress bars.
 No app, no login, no DRM. Files are named cloud-safe and (for multiple picks) grouped per show.
 
-**▶ Live animated demo & landing page:** https://xiaoleiy.github.io/podpull
+**▶ Official site (landing + browser UI):** https://podpull.xiaolei.work  
+**▶ Mirror / demo GIF:** https://xiaoleiy.github.io/podpull
 
 ## Demo
 
@@ -171,7 +172,13 @@ export PODCASTINDEX_API_SECRET=...
 
 Without these, podpull behaves exactly as before (iTunes only).
 
-### Local web UI
+### Web UI
+
+**Hosted:** [podpull.xiaolei.work/app](https://podpull.xiaolei.work/app) — search, trending (中文 / International),
+per-episode browser download. Metadata only on the server; audio comes from the publisher CDN.
+Hosting notes: [`docs/HOSTING.md`](docs/HOSTING.md).
+
+**Local twin** (same UI/API contract):
 
 ```bash
 podpull serve                 # http://127.0.0.1:8787
@@ -179,8 +186,6 @@ podpull serve --port 9000
 podpull serve --host 0.0.0.0  # LAN (prints a warning)
 ```
 
-Search or browse trending (中文 / International), then **Download** one episode at a time
-**in the browser** from the episode’s enclosure URL (no audio proxy through serve).
 For guaranteed saves into `~/Downloads/Podcasts`, keep using `podpull get`.
 
 ## Roadmap
@@ -196,7 +201,7 @@ For guaranteed saves into `~/Downloads/Podcasts`, keep using `podpull get`.
   Podcast Index (BYOK) search + feed-resolution fallback.
 - **v0.7**: `--json` output mode for scripting (`podpull --json list … | jq`).
 - **v0.8** (current): `podpull serve` local web UI (trending + per-episode browser download,
-  EN/中文); landing-page Apple charts teaser.
+  EN/中文); official hosted site at [podpull.xiaolei.work](https://podpull.xiaolei.work).
 - **next**: BYOK summarization (`podpull[ai]`).
 - **v1+ (`podpull[ai]`)**: opt-in **BYOK summarization** — local transcription
   (faster-whisper) + your own LLM key (Anthropic/OpenAI). Fully local, private,

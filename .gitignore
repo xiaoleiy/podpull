@@ -19,3 +19,7 @@ Podcasts/
 
 # OS
 .DS_Store
+
+# Vercel (keep link local; public/ is generated but committed for review)
+.vercel/
+.vercel

@@ -30,6 +30,8 @@ podpull --json <cmd> …                       # one JSON document on stdout (fl
 podpull serve [--host] [--port]              # local UI: search / trending / browser download
 ```
 
+Hosted web UI (same idea, no install): https://podpull.xiaolei.work/app
+
 `<src>` = Apple show URL · bare Apple ID · RSS feed URL · Apple episode `?i=` URL · xiaoyuzhou episode URL.
 
 ## Workflow

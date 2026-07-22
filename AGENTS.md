@@ -7,7 +7,8 @@ below in detail. This file is a short pointer for agents that look for `AGENTS.m
 ## podpull in one line
 
 A stdlib-core Python CLI that downloads a specific podcast episode's audio from Apple Podcasts,
-an RSS feed, or a xiaoyuzhou (小宇宙) link. Python ≥ 3.9.
+an RSS feed, or a xiaoyuzhou (小宇宙) link. Python ≥ 3.9. Official hosted UI:
+https://podpull.xiaolei.work (see `docs/HOSTING.md`).
 
 ## The must-know invariants (details in CLAUDE.md)
 

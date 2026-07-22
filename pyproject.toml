@@ -46,3 +46,4 @@ markers = [
     "network: hits live podcast hosts; excluded by default (run: pytest -m network)",
 ]
 addopts = "-m 'not network'"
+pythonpath = ["."]

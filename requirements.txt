@@ -1,0 +1,3 @@
+# Vercel may install this file; the hosted API (api/index.py) is stdlib-only
+# and imports podpull from src/. Keep empty of runtime deps so the function
+# bundle stays lean. CLI deps remain in pyproject.toml.

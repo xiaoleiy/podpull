@@ -17,6 +17,7 @@ Commands:
 - `podpull get <src> ... -q/--quiet` — suppress spinner/progress bar.
 - `podpull --json <cmd> …` — one JSON document on stdout (flag before the command).
 - `podpull serve` — local UI (search / trending / browser download).
+- Hosted UI: https://podpull.xiaolei.work/app (metadata API only; audio via publisher CDN).
 `<src>` = Apple show URL · bare Apple ID · RSS feed URL · Apple episode URL · xiaoyuzhou link.
 
 Rules:

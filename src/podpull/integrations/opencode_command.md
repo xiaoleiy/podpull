@@ -16,6 +16,7 @@ Commands:
 - `podpull get <src> ... -q/--quiet` — suppress spinner/progress bar output.
 - `podpull --json <cmd> …` — one JSON document on stdout (place `--json` before the command).
 - `podpull serve` — local UI (search / trending / browser enclosure download).
+- Hosted UI: https://podpull.xiaolei.work/app
 
 Rules:
 - ALWAYS pass a selector (`--match` / `--latest` / `--index`) **and `--no-input`** — never run a bare

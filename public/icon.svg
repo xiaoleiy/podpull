@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="podpull">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c1224"/>
+      <stop offset="1" stop-color="#070910"/>
+    </linearGradient>
+    <linearGradient id="tri" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#4dffb0"/>
+      <stop offset="0.55" stop-color="#35e0a1"/>
+      <stop offset="1" stop-color="#37c6ff"/>
+    </linearGradient>
+    <filter id="aurora" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="70"/>
+    </filter>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="30"/>
+    </filter>
+    <clipPath id="rounded"><rect width="1024" height="1024" rx="232"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#rounded)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+
+    <!-- aurora glow, echoing the landing page -->
+    <g filter="url(#aurora)">
+      <circle cx="255" cy="285" r="300" fill="#12c187" opacity="0.72"/>
+      <circle cx="815" cy="215" r="255" fill="#1f74ff" opacity="0.6"/>
+      <circle cx="660" cy="835" r="245" fill="#8a44ff" opacity="0.5"/>
+    </g>
+
+    <!-- brand mark: ▸ (shell prompt / play), rounded, mint→cyan -->
+    <path d="M 392 300 L 742 512 L 392 724 Z"
+          fill="url(#tri)" filter="url(#glow)" opacity="0.85"/>
+    <path d="M 392 300 L 742 512 L 392 724 Z"
+          fill="url(#tri)" stroke="url(#tri)" stroke-width="46"
+          stroke-linejoin="round" stroke-linecap="round"/>
+
+    <!-- soft top highlight + subtle inner rim -->
+    <rect width="1024" height="470" fill="#ffffff" opacity="0.03"/>
+  </g>
+  <rect x="8" y="8" width="1008" height="1008" rx="226"
+        fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="4"/>
+</svg>
