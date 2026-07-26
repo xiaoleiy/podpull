@@ -11,6 +11,7 @@ import os
 import shutil
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
 from rich.console import Console
@@ -63,8 +64,40 @@ def _resolve_show(kind: str, s: str, args) -> core.Show:
                      author=author or feed_author, apple_id=pid, episodes=eps)
 
 
+def _dl_progress() -> Progress:
+    """The shared per-file download progress display (rendered on stderr)."""
+    return Progress(
+        SpinnerColumn(),
+        TextColumn("[bold blue]{task.fields[label]}", justify="left"),
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        DownloadColumn(),
+        TransferSpeedColumn(),
+        TimeRemainingColumn(),
+        console=ui,
+        transient=True,
+    )
+
+
 def _download_all(episodes: list[core.Episode], out_dir: str, args) -> int:
-    """Download episodes with a live per-file progress bar."""
+    """Download episodes, up to `args.jobs` at a time, and return how many saved.
+
+    The fallback of 1 (not the CLI default of 4) keeps any caller that omits `jobs`
+    — e.g. the pasted-episode paths and the tests — running sequentially, so their
+    ordering guarantees hold. `effective` never exceeds the number of episodes, so a
+    single-episode download takes the plain sequential path unchanged.
+    """
+    if not episodes:
+        return 0
+    jobs = max(1, getattr(args, "jobs", 1) or 1)
+    effective = min(jobs, len(episodes))
+    if effective <= 1:
+        return _download_sequential(episodes, out_dir, args)
+    return _download_parallel(episodes, out_dir, args, effective)
+
+
+def _download_sequential(episodes: list[core.Episode], out_dir: str, args) -> int:
+    """One episode at a time with a single live progress bar."""
     n = 0
     if args.quiet:
         # quiet mode: no progress bar
@@ -77,35 +110,80 @@ def _download_all(episodes: list[core.Episode], out_dir: str, args) -> int:
             print(path)
             n += 1
         return n
-    else:
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[bold blue]{task.fields[label]}", justify="left"),
-            BarColumn(),
-            "[progress.percentage]{task.percentage:>3.0f}%",
-            DownloadColumn(),
-            TransferSpeedColumn(),
-            TimeRemainingColumn(),
-            console=ui,
-            transient=True,
-        ) as progress:
-            for ep in episodes:
-                task = progress.add_task("dl", label=ep.title[:34] or "episode", total=None)
+    with _dl_progress() as progress:
+        for ep in episodes:
+            task = progress.add_task("dl", label=ep.title[:34] or "episode", total=None)
 
-                def cb(done: int, total: int, _t=task) -> None:
-                    progress.update(_t, completed=done, total=(total or None))
+            def cb(done: int, total: int, _t=task) -> None:
+                progress.update(_t, completed=done, total=(total or None))
 
-                try:
-                    path = core.download_episode(ep, out_dir, on_progress=cb)
-                except Exception as e:      # keep going on a single failure
-                    progress.console.print(f"[red]✗[/] {ep.title[:50]}: {e}")
-                    continue
+            try:
+                path = core.download_episode(ep, out_dir, on_progress=cb)
+            except Exception as e:      # keep going on a single failure
+                progress.console.print(f"[red]✗[/] {ep.title[:50]}: {e}")
+                continue
+            progress.remove_task(task)
+            size = os.path.getsize(path)
+            ui.print(f"[green]✓[/] {ep.date}  {ep.title[:50]}  [dim]({size/1e6:.1f} MB)[/]")
+            print(path)                 # stdout: the saved file path
+            n += 1
+    return n
+
+
+def _download_parallel(episodes: list[core.Episode], out_dir: str, args,
+                       workers: int) -> int:
+    """Download several episodes at once. Workers only touch the (thread-safe)
+    rich Progress; stdout/stderr are written from this thread. Saved paths print in
+    selection order after the pool drains, so stdout stays deterministic."""
+    saved: list[str | None] = [None] * len(episodes)
+    quiet = args.quiet
+    progress = _dl_progress()           # inert in quiet mode: never started, no tasks
+
+    def work(i: int, ep: core.Episode):
+        """-> (index, saved_path) on success, or (index, exception) on failure."""
+        task = (progress.add_task("dl", label=ep.title[:34] or "episode", total=None)
+                if not quiet else None)
+
+        def cb(done: int, total: int, _t=task) -> None:
+            progress.update(_t, completed=done, total=(total or None))
+
+        try:
+            return i, core.download_episode(
+                ep, out_dir, on_progress=(cb if task is not None else None))
+        except Exception as e:          # keep going on a single failure
+            return i, e
+        finally:
+            if task is not None:
                 progress.remove_task(task)
-                size = os.path.getsize(path)
-                ui.print(f"[green]✓[/] {ep.date}  {ep.title[:50]}  [dim]({size/1e6:.1f} MB)[/]")
-                print(path)                 # stdout: the saved file path
-                n += 1
 
+    def drain() -> None:
+        futures = [pool.submit(work, i, ep) for i, ep in enumerate(episodes)]
+        for fut in as_completed(futures):
+            i, res = fut.result()
+            ep = episodes[i]
+            if isinstance(res, Exception):
+                if quiet:
+                    _err(f"{ep.title[:50]}: {res}")
+                else:
+                    progress.console.print(f"[red]✗[/] {ep.title[:50]}: {res}")
+                continue
+            saved[i] = res
+            if not quiet:
+                size = os.path.getsize(res)
+                ui.print(f"[green]✓[/] {ep.date}  {ep.title[:50]}  [dim]({size/1e6:.1f} MB)[/]")
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        if quiet:
+            drain()
+        else:
+            with progress:
+                drain()
+
+    n = 0
+    for path in saved:                  # stdout: saved paths, in selection order
+        if path is not None:
+            print(path)
+            n += 1
     return n
 
 
@@ -363,6 +441,7 @@ EXAMPLES = """
   [cyan]podpull get[/]   1532755821 --latest 3       newest 3 episodes
   [cyan]podpull get[/]   1532755821 --index 0,2,5    by list number (0 = newest)
   [cyan]podpull get[/]   1532755821 --match "牛頭人"  by title regex
+  [cyan]podpull get[/]   1532755821 --latest 8 -j 8   newest 8, 8 downloads in parallel
   [cyan]podpull get[/]   "https://www.xiaoyuzhoufm.com/episode/<id>"   a pasted link
 
 [dim]<src> = Apple show URL · bare Apple ID · RSS feed URL · Apple ?i= episode URL · xiaoyuzhou link[/]
@@ -415,6 +494,8 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--index", metavar="N[,N]", help="0-based list indices (0 = newest)")
     s.add_argument("--out", default=DEFAULT_OUT, metavar="DIR",
                    help=f"output directory (default: {DEFAULT_OUT})")
+    s.add_argument("-j", "--jobs", type=int, default=4, metavar="N",
+                   help="download up to N episodes in parallel (default 4; 1 = sequential)")
     s.add_argument("--no-input", action="store_true",
                    help="never prompt; fail instead of opening the interactive picker")
     s.set_defaults(func=cmd_get)

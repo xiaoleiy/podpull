@@ -15,6 +15,7 @@ Commands:
 - `podpull get <src> --match RE | --latest N | --index 0,2` — download (alias: `pull`).
 - `podpull get <episode-url>` — a pasted Apple `?i=` or xiaoyuzhou link.
 - `podpull get <src> ... -q/--quiet` — suppress spinner/progress bar.
+- `podpull get <src> ... -j/--jobs N` — download N episodes in parallel (default 4; `-j 1` = sequential).
 `<src>` = Apple show URL · bare Apple ID · RSS feed URL · Apple episode URL · xiaoyuzhou link.
 
 Rules:
@@ -23,5 +24,6 @@ Rules:
 - Also pass `-q`/`--quiet` — the spinner/progress bar are pointless outside a live terminal; stdout
   output (the saved file path) is unaffected.
 - File path prints to stdout, progress to stderr. Default output `~/Downloads/Podcasts` (`--out` to change).
-- Multiple episodes → per-show folder; filenames are normalized to be cloud-storage-safe (CJK kept).
+- Multiple episodes download in parallel (up to 4 at once; `-j/--jobs N` to tune) → per-show folder;
+  filenames are normalized to be cloud-storage-safe (CJK kept).
 - Optional: if PODCASTINDEX_API_KEY/PODCASTINDEX_API_SECRET are set, `search` also queries Podcast Index and feed resolution gains a fallback; ximalaya.com/album/<id> links work as a source.

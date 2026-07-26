@@ -26,6 +26,7 @@ podpull list  <src> [--match RE] [--all]     # list episodes; index 0 = newest
 podpull get   <src> --match RE | --latest N | --index 0,2[,..]   # download (alias: `pull`)
 podpull get   <episode-url>                  # download a pasted Apple ?i= or xiaoyuzhou link
 podpull get   <src> ... -q / --quiet         # suppress spinner/progress bar
+podpull get   <src> ... -j / --jobs N        # download N episodes in parallel (default 4; 1 = sequential)
 
 ```
 
@@ -46,8 +47,9 @@ podpull get   <src> ... -q / --quiet         # suppress spinner/progress bar
   agent transcripts, since neither renders meaningfully outside a live terminal. Saved file paths still
   print to stdout either way.
 - Downloads default to `~/Downloads/Podcasts`; pass `--out DIR` to change.
-- Selecting **multiple** episodes creates a per-show sub-folder. Filenames are normalized to be
-  cloud-storage-safe (emoji/illegal characters removed; CJK kept).
+- Selecting **multiple** episodes downloads them **in parallel** (up to 4 at once by default; tune
+  with `-j/--jobs N`, `-j 1` = sequential) and creates a per-show sub-folder. Filenames are
+  normalized to be cloud-storage-safe (emoji/illegal characters removed; CJK kept).
 - Optional: if PODCASTINDEX_API_KEY/PODCASTINDEX_API_SECRET are set, `search` also queries Podcast Index and feed resolution gains a fallback; ximalaya.com/album/<id> links work as a source.
 
 ## Examples

@@ -128,6 +128,7 @@ podpull get 1532755821 --latest 1               # newest episode
 podpull get 1532755821 --match "牛頭人"          # by title regex
 podpull get 1532755821 --index 0,2,5            # by list number (0 = newest)
 podpull get 1532755821 --latest 3 --out ~/Audio/bedtime
+podpull get 1532755821 --latest 8 -j 8          # 8 episodes downloading in parallel
 
 # Pasted single-episode links:
 podpull get "https://www.xiaoyuzhoufm.com/episode/<id>"
@@ -137,6 +138,10 @@ podpull get "https://podcasts.apple.com/.../id<show>?i=<track>"
 Downloads default to `~/Downloads/Podcasts` (override with `--out`). The saved file
 path is printed to **stdout** (so you can pipe/capture it); progress and messages go
 to **stderr**. Use `--no-input` to never open the picker (fail instead) for scripts.
+
+When you select several episodes they download **in parallel** — up to 4 at once by
+default. Tune it with `-j/--jobs N` (`-j 1` forces one-at-a-time); saved paths still
+print to stdout in selection order.
 
 **Filenames** are normalized for cloud storage — emoji and other symbols are dropped,
 full-width/illegal characters folded or stripped — so files upload cleanly to Google

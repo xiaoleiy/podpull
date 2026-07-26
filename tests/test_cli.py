@@ -172,6 +172,78 @@ def test_get_quiet_continues_after_one_failure(monkeypatch, tmp_path):
     assert not os.path.exists(os.path.join(show_dir, "EP1.mp3"))
 
 
+# --------------------------------------------------------------------------- #
+# parallel downloads (-j / --jobs)
+# --------------------------------------------------------------------------- #
+def _eps(n):
+    return [core.Episode(title=f"EP{i}", pub="Sat, 27 Jun 2026 22:02:06 GMT", url=f"u{i}")
+            for i in range(n)]
+
+
+def _writing_dl(monkeypatch, fail_title=None):
+    """Patch core.download_episode with a writer; return the order it ran in."""
+    order = []
+
+    def fake_dl(ep, out, on_progress=None):
+        order.append(ep.title)
+        if fail_title is not None and ep.title == fail_title:
+            raise RuntimeError("boom")
+        os.makedirs(out, exist_ok=True)
+        if on_progress:
+            on_progress(1, 1)
+        p = os.path.join(out, ep.title + ".mp3")
+        with open(p, "wb") as f:
+            f.write(b"x")
+        return p
+
+    monkeypatch.setattr(cli.core, "download_episode", fake_dl)
+    return order
+
+
+def test_download_all_parallel_saves_all_in_selection_order(monkeypatch, tmp_path, capsys):
+    _writing_dl(monkeypatch)
+    n = cli._download_all(_eps(5), str(tmp_path),
+                          argparse.Namespace(jobs=4, quiet=True))
+    assert n == 5
+    paths = capsys.readouterr().out.strip().splitlines()
+    # stdout is deterministic (selection order) regardless of finish order
+    assert paths == [os.path.join(str(tmp_path), f"EP{i}.mp3") for i in range(5)]
+
+
+def test_download_all_parallel_continues_after_failure(monkeypatch, tmp_path, capsys):
+    _writing_dl(monkeypatch, fail_title="EP1")
+    monkeypatch.setattr(cli, "ui", Console(file=io.StringIO(), stderr=True))  # swallow _err
+    n = cli._download_all(_eps(3), str(tmp_path),
+                          argparse.Namespace(jobs=4, quiet=True))
+    assert n == 2
+    paths = capsys.readouterr().out.strip().splitlines()
+    assert paths == [os.path.join(str(tmp_path), "EP0.mp3"),
+                     os.path.join(str(tmp_path), "EP2.mp3")]   # EP1 skipped, order kept
+
+
+def test_download_all_jobs_one_is_sequential(monkeypatch, tmp_path):
+    order = _writing_dl(monkeypatch)
+    cli._download_all(_eps(3), str(tmp_path), argparse.Namespace(jobs=1, quiet=True))
+    assert order == ["EP0", "EP1", "EP2"]                      # strict sequential order
+
+
+def test_download_all_parallel_nonquiet_smoke(monkeypatch, tmp_path):
+    _writing_dl(monkeypatch)
+    monkeypatch.setattr(cli, "ui", Console(file=io.StringIO(), stderr=True))  # capture UI
+    n = cli._download_all(_eps(3), str(tmp_path),
+                          argparse.Namespace(jobs=3, quiet=False))            # progress path
+    assert n == 3
+    for i in range(3):
+        assert os.path.exists(os.path.join(str(tmp_path), f"EP{i}.mp3"))
+
+
+def test_get_parser_jobs_flag():
+    parse = cli.build_parser().parse_args
+    assert parse(["get", "123"]).jobs == 4                     # default
+    assert parse(["get", "123", "-j", "8"]).jobs == 8
+    assert parse(["get", "123", "--jobs", "2"]).jobs == 2
+
+
 def _search_args(term="故事"):
     return argparse.Namespace(term=term, limit=10, country="US")
 

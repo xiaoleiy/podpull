@@ -3,6 +3,14 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
+## [0.7.0] — 2026-07-26
+
+### Added
+- `podpull get` now downloads multiple selected episodes **in parallel** (up to 4 at
+  a time by default) for a big speedup on multi-episode grabs. New `-j/--jobs N` flag
+  controls the concurrency; `-j 1` restores sequential downloads. A single-episode
+  download is unchanged. Saved paths still print to stdout in selection order.
+
 ## [0.6.0] — 2026-07-08
 
 ### Added
