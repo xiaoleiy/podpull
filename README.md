@@ -11,8 +11,8 @@
 <p align="center"><b>Find episodes from any show. Download straight to disk — Apple Podcasts, RSS, or 小宇宙/xiaoyuzhou.</b></p>
 
 Use the **CLI** (interactive multi-select picker, spinners, progress bars) or the
-**browser UI**. No app, no login, no DRM. Filenames are cloud-safe; multiple CLI
-picks land in a per-show folder under `~/Downloads/Podcasts`.
+**browser UI**. No app, no login, no DRM. Filenames are cloud-safe; CLI downloads
+land in a per-show folder in the current directory.
 
 **▶ Official site:** https://podpull.xiaolei.work — landing `/` · app [`/app`](https://podpull.xiaolei.work/app)  
 **▶ GitHub Pages mirror:** https://xiaoleiy.github.io/podpull
@@ -32,7 +32,7 @@ $ podpull get 1532755821
 ❯ ◉ 2026-06-23  EP343 迷宮中的牛頭人
   ◯ 2026-06-16  EP342 午睡任務
   ◉ 2026-06-09  EP341 修煉龍 4
-██████████████████  100%  21.2 MB  •  saved to ~/Downloads/Podcasts/我們家的睡前故事/
+██████████████████  100%  21.2 MB  •  saved to ./我們家的睡前故事/
 ```
 </details>
 
@@ -143,9 +143,10 @@ podpull get "https://podcasts.apple.com/.../id<show>?i=<track>"
 podpull get "https://www.ximalaya.com/album/<id>"
 ```
 
-Downloads default to `~/Downloads/Podcasts` (override with `--out`). The saved file
-path is printed to **stdout** (so you can pipe/capture it); progress and messages go
-to **stderr**. Use `--no-input` to never open the picker (fail instead) for scripts.
+Downloads default to `./<show name>/` in the current directory (override with `--out`).
+The saved file path is printed to **stdout** (so you can pipe/capture it); progress
+and messages go to **stderr**. Use `--no-input` to never open the picker (fail instead)
+for scripts.
 
 ### JSON (scripting)
 
@@ -204,8 +205,8 @@ podpull serve --host 0.0.0.0  # LAN (prints a warning)
 podpull serve --no-open       # don't open a browser
 ```
 
-For guaranteed saves into `~/Downloads/Podcasts` with cloud-safe names, keep using
-`podpull get`.
+For guaranteed saves into a per-show folder (cloud-safe names) in the current
+directory, keep using `podpull get`.
 
 ## Roadmap
 
@@ -219,9 +220,11 @@ For guaranteed saves into `~/Downloads/Podcasts` with cloud-safe names, keep usi
   verified against Chinese-market hosts, `ximalaya.com/album/<id>` links, optional
   Podcast Index (BYOK) search + feed-resolution fallback.
 - **v0.7**: `--json` output mode for scripting (`podpull --json list … | jq`).
-- **v0.8** (current): `podpull serve` + hosted site at [podpull.xiaolei.work](https://podpull.xiaolei.work)
+- **v0.8**: `podpull serve` + hosted site at [podpull.xiaolei.work](https://podpull.xiaolei.work)
   (landing `/`, app `/app`, metadata `/api`); trending (中文 / International); EN/中文;
   per-episode browser download (no audio proxy).
+- **v0.9** (current): CLI downloads default to `./<show name>/` in the current
+  directory (not `~/Downloads/Podcasts`); every show download uses a per-show folder.
 - **next**: BYOK summarization (`podpull[ai]`).
 - **v1+ (`podpull[ai]`)**: opt-in **BYOK summarization** — local transcription
   (faster-whisper) + your own LLM key (Anthropic/OpenAI). Fully local, private,

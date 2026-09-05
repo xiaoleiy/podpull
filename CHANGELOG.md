@@ -3,6 +3,13 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
+## [0.9.0] — 2026-09-05
+
+### Changed
+- **`podpull get` default `--out`** is the current working directory (not
+  `~/Downloads/Podcasts`). Every show download now lands in `./<show name>/`
+  (or `<out>/<show name>/` when `--out` is set), including a single episode.
+
 ## [0.8.1] — 2026-07-21
 
 ### Fixed

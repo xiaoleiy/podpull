@@ -51,8 +51,9 @@ Hosted web UI (same idea, no install): https://podpull.xiaolei.work/app
 - Prefer **`podpull --json …`** when you need structured data (`search` / `info` / `list` / `get`).
   The flag goes **before** the command. On success stdout is one JSON document; on failure check the
   exit code (human error on stderr, no JSON).
-- Downloads default to `~/Downloads/Podcasts`; pass `--out DIR` to change.
-- Selecting **multiple** episodes creates a per-show sub-folder. Filenames are normalized to be
+- Downloads default to `./<show name>/` in the current working directory; pass `--out DIR`
+  to change the parent (still creates the per-show folder).
+- Every show download creates a per-show sub-folder. Filenames are normalized to be
   cloud-storage-safe (emoji/illegal characters removed; CJK kept).
 - Optional: if PODCASTINDEX_API_KEY/PODCASTINDEX_API_SECRET are set, `search` also queries Podcast Index and feed resolution gains a fallback; ximalaya.com/album/<id> links work as a source.
 

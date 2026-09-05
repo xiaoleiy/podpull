@@ -55,8 +55,9 @@ vercel.json          # podpull.xiaolei.work deploy config
    (`feed.xyzfm.space`) returns 403 to identifiable tool UAs. Don't "brand" it back.
 6. **All text file I/O is explicit `encoding="utf-8"`.** Windows defaults to cp1252 and will
    raise on CJK otherwise (audio writes are binary — that's fine).
-7. **Multiple episodes → a per-show sub-folder** (`<out>/<show name>/`); a single episode
-   lands directly in `--out`.
+7. **Episodes land in a per-show sub-folder** (`<out>/<show name>/`, default `--out` is
+   the current working directory). Pasted single-episode links (no show title) still
+   land directly in `--out`.
 
 ## Dev workflow
 

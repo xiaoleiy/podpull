@@ -26,6 +26,7 @@ Rules:
 - Also pass `-q`/`--quiet` — the spinner/progress bar are pointless outside a live terminal; stdout
   output (the saved file path) is unaffected.
 - Prefer `podpull --json …` when you need structured data (`search`/`info`/`list`/`get`).
-- File path prints to stdout, progress to stderr. Default output `~/Downloads/Podcasts` (`--out` to change).
-- Multiple episodes → per-show folder; filenames are normalized to be cloud-storage-safe (CJK kept).
+- File path prints to stdout, progress to stderr. Default output is `./<show name>/` in the current
+  directory (`--out DIR` changes the parent).
+- Every show download → per-show folder; filenames are normalized to be cloud-storage-safe (CJK kept).
 - Optional: if PODCASTINDEX_API_KEY/PODCASTINDEX_API_SECRET are set, `search` also queries Podcast Index and feed resolution gains a fallback; ximalaya.com/album/<id> links work as a source.

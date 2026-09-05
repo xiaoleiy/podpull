@@ -129,7 +129,7 @@ def test_get_multiple_episodes_go_in_show_folder(monkeypatch, tmp_path):
     assert outs == [expected, expected]          # both into the show subfolder
 
 
-def test_get_single_episode_no_folder(monkeypatch, tmp_path):
+def test_get_single_episode_goes_in_show_folder(monkeypatch, tmp_path):
     monkeypatch.setattr(cli.core, "classify", lambda s: ("apple_show", s))
     monkeypatch.setattr(cli, "_resolve_show", lambda kind, s, args=None: _show())
     outs = _capture_outdirs(monkeypatch)
@@ -137,7 +137,14 @@ def test_get_single_episode_no_folder(monkeypatch, tmp_path):
     rc = cli.cmd_get(argparse.Namespace(src="123", match=None, latest=1,
                                         index=None, out=str(tmp_path), no_input=True, quiet=False))
     assert rc == 0
-    assert outs == [str(tmp_path)]               # single -> straight into out dir
+    expected = os.path.join(str(tmp_path), "Demo Show")
+    assert outs == [expected]                    # show folder even for one episode
+
+
+def test_parser_default_out_is_cwd():
+    args = cli.build_parser().parse_args(["get", "123", "--latest", "1"])
+    assert args.out == "."
+    assert "Downloads" not in args.out
 
 
 def test_get_quiet_skips_picker_and_progress(monkeypatch, tmp_path):

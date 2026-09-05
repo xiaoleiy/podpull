@@ -26,7 +26,7 @@ try:
 except Exception:                      # pragma: no cover - fallback if absent
     _Formatter = argparse.RawDescriptionHelpFormatter
 
-DEFAULT_OUT = os.path.expanduser("~/Downloads/Podcasts")
+DEFAULT_OUT = "."
 out_console = Console()                # stdout — machine-readable (file paths)
 ui = Console(stderr=True)              # stderr — humans (spinners, tables, bars)
 
@@ -381,10 +381,8 @@ def cmd_get(args) -> int:
         _err("no episode matched your selection")
         return 1
 
-    # Multiple episodes -> drop them into a folder named after the show.
-    target = out
-    if len(sel) > 1:
-        target = os.path.join(out, core.safe_filename(show.title))
+    # Always land in a folder named after the show (under --out, default cwd).
+    target = os.path.join(out, core.safe_filename(show.title))
     if not _is_quiet(args):
         ui.print(f"[bold]Downloading {len(sel)} episode(s)[/] from “{show.title}” → [dim]{target}[/]")
     n, records = _download_all(sel, target, args)
@@ -499,7 +497,7 @@ EXAMPLES = """
   [cyan]podpull get[/]   "https://www.xiaoyuzhoufm.com/episode/<id>"   a pasted link
 
 [dim]<src> = Apple show URL · bare Apple ID · RSS feed URL · Apple ?i= episode URL · xiaoyuzhou link[/]
-[dim]Downloads default to ~/Downloads/Podcasts (override with --out).[/]
+[dim]Downloads default to ./<show name>/ in the current directory (override with --out).[/]
 [dim]Scripting: podpull --json list <src> | jq …   (JSON on stdout; flag goes before the command)[/]
 
 [dim]Optional: set PODCASTINDEX_API_KEY + PODCASTINDEX_API_SECRET (free — podcastindex.org)[/]
@@ -550,7 +548,7 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--latest", type=int, metavar="N", help="newest N episodes")
     g.add_argument("--index", metavar="N[,N]", help="0-based list indices (0 = newest)")
     s.add_argument("--out", default=DEFAULT_OUT, metavar="DIR",
-                   help=f"output directory (default: {DEFAULT_OUT})")
+                   help="parent directory for the per-show folder (default: current directory)")
     s.add_argument("--no-input", action="store_true",
                    help="never prompt; fail instead of opening the interactive picker")
     s.set_defaults(func=cmd_get)
