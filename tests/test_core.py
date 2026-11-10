@@ -324,3 +324,11 @@ def test_apple_show_to_feed_no_creds_still_raises(monkeypatch):
     with pytest.raises(ValueError):
         core.apple_show_to_feed("123")
     assert calls == []                     # PI never contacted without keys
+
+
+def test_select_match_invalid_regex_treated_literally():
+    # A --match value like "[" is not valid regex; it must match literally
+    # instead of crashing with re.error.
+    eps = [Episode(title="a [b] c", pub="", url="u1"),
+           Episode(title="plain", pub="", url="u2")]
+    assert [e.url for e in core.select(eps, match="[")] == ["u1"]
