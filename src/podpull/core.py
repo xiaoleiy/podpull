@@ -378,7 +378,11 @@ def apple_episode_to_audio(src: str) -> tuple[str | None, str | None, str | None
 def select(episodes: list[Episode], *, match: str | None = None,
            latest: int | None = None, index: str | None = None) -> list[Episode]:
     if match:
-        rx = re.compile(match, re.I)
+        try:
+            rx = re.compile(match, re.I)
+        except re.error:
+            # Not valid regex (e.g. "--match ["): match it literally.
+            rx = re.compile(re.escape(match), re.I)
         return [e for e in episodes if rx.search(e.title)]
     if latest:
         return episodes[:latest]
